@@ -88,7 +88,8 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  int i = 1000;
+  uint8_t flag_Sentido_Horario = 1;
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -117,12 +118,20 @@ int main(void)
     MX_USB_HOST_Process();
 
     /* USER CODE BEGIN 3 */
-    htim2.Instance -> CCR1 = 1000; // Esto son 0 grados
-    HAL_Delay(1000);
-    htim2.Instance -> CCR1 = 1500; // Esto son 90 grados
-    HAL_Delay(1000);
-    htim2.Instance -> CCR1 = 2000; // Esto son 180 grados
-    HAL_Delay(1000);
+    // Aqui se programa el movimiento del motor del radar
+    if(flag_Sentido_Horario == 1){
+    	i++;
+    }else{
+    	i--;
+    }
+
+    if(i == 2000) flag_Sentido_Horario =  0;
+    else if (i == 1000) flag_Sentido_Horario = 1;
+    HAL_Delay(1);
+    htim2.Instance -> CCR1 = i;
+    // Fin codigo movimiento motor radar
+
+
   }
   /* USER CODE END 3 */
 }
