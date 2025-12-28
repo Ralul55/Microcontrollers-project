@@ -22,7 +22,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "VL53L0X.h"
+#include <stdio.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,6 +52,9 @@ SPI_HandleTypeDef hspi1;
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
+
+  statInfo_t_VL53L0X distanceStr; // Estructura de “estadísticas/estado” que usa la librería
+  volatile uint16_t distance_mm = 0; // Variable donde guardaremos la distancia (mm)
 
 /* USER CODE END PV */
 
@@ -90,6 +95,7 @@ int main(void)
   /* USER CODE BEGIN Init */
   int i = 1000;
   uint8_t flag_Sentido_Horario = 1;
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -108,6 +114,25 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+
+  //Prueba de funcionamiento del sensor laser (Hay que conectar en sensor laser antes y luego debuggear)
+  //Cuando pare en el __NOP(); abre:Window → Show View → Expressions
+  //Añade sensor_ok (botón Add new expression)
+  /*uint8_t addr = 0x29 << 1;     // HAL usa 8-bit
+  HAL_StatusTypeDef ok = HAL_I2C_IsDeviceReady(&hi2c1, addr, 10, 100);
+
+  volatile int sensor_ok = (ok == HAL_OK);  // <-- esto se mira en Watch
+  __NOP();*/
+
+  //Inicializacion del sensor con el .h y .c de github:
+  memset(&distanceStr, 0, sizeof(distanceStr));
+  initVL53L0X(1, &hi2c1);  // Inicializa el VL53L0X: el primer parámetro es el ID del sensor (1) y luego el I2C handle
+  // (Opcional recomendado por el autor) Configuración para mejor precisión en distancias largas (1 ~ 2m)
+  setSignalRateLimit(0.1f);
+  setVcselPulsePeriod(VcselPeriodPreRange, 18);
+  setVcselPulsePeriod(VcselPeriodFinalRange, 14);
+  setMeasurementTimingBudget(200000); //  (priorizando precisión para medir mayores distancias, a costa de la velocidad) Si se requiere más velocidad disminuir el TimingBudget
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -127,9 +152,18 @@ int main(void)
 
     if(i == 2000) flag_Sentido_Horario =  0;
     else if (i == 1000) flag_Sentido_Horario = 1;
-    HAL_Delay(1);
     htim2.Instance -> CCR1 = i;
     // Fin codigo movimiento motor radar
+
+    //Inicio lecturas del sensor de distancia
+    static uint32_t t_last = 0;
+    if (HAL_GetTick() - t_last >= 50) {   // lee cada 50 ms sin interrumpir al motor
+        t_last = HAL_GetTick();
+        distance_mm = readRangeSingleMillimeters(&distanceStr);
+    }
+    //Fin lecturas del sensor de distancia
+
+    HAL_Delay(2);
 
 
   }
