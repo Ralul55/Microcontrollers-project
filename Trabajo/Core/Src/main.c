@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "VL53L0X.h"
+#include "posicion_pool.h"
 #include <stdio.h>
 #include <string.h>
 /* USER CODE END Includes */
@@ -91,6 +92,7 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
+  pool_init(); //reseteo de la memoria
 
   /* USER CODE BEGIN Init */
   int i = 1000;
