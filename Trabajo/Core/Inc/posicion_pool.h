@@ -19,7 +19,7 @@ typedef struct
 //todas empiezan por objetivo para que sean mas faciles de buscar
 
 //SE USAN BOOLS PARA TENER UNA FORMA DE VER SI FALLA, PERO PODRIAN SER VOID(!!!)
-//las funciones _g son las que reciben el angulo en grados, si no recibe el valor entre 1000 (0º) y 2000 (180º)
+//las funciones _g son las que reciben el angulo en grados, si no recibe el valor entre 1000 (0º) y 2000 (360º)
 
 void pool_init(void);
 

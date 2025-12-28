@@ -9,13 +9,13 @@ static uint8_t numero_huecos = 0u;
 //se necesita porque aparentemente comparar 2 floats no es trivial
 static const float margen_igualdad = 0.01f;  // 0,01 grados
 
-//1000 es 0, 2000 es 180
+//1000 es 0, 2000 es 360
 //es static, solo se puede usar desde aqui, si se necesita fuera pues se quita el static
 static float transforma_g(uint16_t angulo){
 	//comprobaciones que no se si deberian estar
 	//if (angulo<1000){return 0.0f;}
-	//if (angulo>2000){return 180.0f;}
-	float resultado=(((float)angulo*0.18f)-180.0f);
+	//if (angulo>2000){return 360.0f;}
+	float resultado=(((float)angulo*0.36f)-360.0f);
 	return resultado;
 }
 
