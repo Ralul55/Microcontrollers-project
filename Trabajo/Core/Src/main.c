@@ -96,7 +96,16 @@ int main(void)
 
   /* USER CODE BEGIN Init */
   int i = 1000;
+  float sumatorio_Grados = 0;
+  float media_Grados = 0;
+
+  float sumatorio_Distancia = 0;
+  float media_Distancia = 0;
+
+  int numero_Objetivos = 0;
+
   uint8_t flag_Sentido_Horario = 1;
+  uint8_t flag_Objetivo_Detectado = 0;
 
   /* USER CODE END Init */
 
@@ -162,6 +171,31 @@ int main(void)
     if (HAL_GetTick() - t_last >= 50) {   // lee cada 50 ms sin interrumpir al motor
         t_last = HAL_GetTick();
         distance_mm = readRangeSingleMillimeters(&distanceStr);
+
+        if(distance_mm <= DISTANCIA_DE_DETECCION){
+        	flag_Objetivo_Detectado = 1;
+
+        	sumatorio_Grados += i;
+        	sumatorio_Distancia += (float)distance_mm;
+        	numero_Objetivos++;
+
+        }else {
+            if (flag_Objetivo_Detectado == 1) {
+
+                if (numero_Objetivos > 0) { //Es una condicion redundante, pero por seguridad la he puesto
+                    media_Grados = sumatorio_Grados / numero_Objetivos;
+                    media_Distancia = sumatorio_Distancia / numero_Objetivos;
+                    objetivo_guarda(media_Distancia, (uint16_t)media_Grados);
+                }
+
+                // reset
+                sumatorio_Grados = 0;
+                sumatorio_Distancia = 0;
+                numero_Objetivos = 0;
+                flag_Objetivo_Detectado = 0;
+            }
+        }
+
     }
     //Fin lecturas del sensor de distancia
 
