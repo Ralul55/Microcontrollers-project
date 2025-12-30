@@ -92,10 +92,9 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-  pool_init(); //reseteo de la memoria
 
   /* USER CODE BEGIN Init */
-  int i = 1000;
+  int angulo_Radar_Horizontal = 1000;
   float sumatorio_Grados = 0;
   float media_Grados = 0;
 
@@ -106,6 +105,9 @@ int main(void)
 
   uint8_t flag_Sentido_Horario = 1;
   uint8_t flag_Objetivo_Detectado = 0;
+
+  Posicion* Objetivo;
+  int angulo_Laser_Horizontal = 1000;
 
   /* USER CODE END Init */
 
@@ -124,7 +126,11 @@ int main(void)
   MX_USB_HOST_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  pool_init();
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+  htim2.Instance->CCR1 = 1500; // centro
+  htim2.Instance->CCR2 = 1500; // centro
 
   //Prueba de funcionamiento del sensor laser (Hay que conectar en sensor laser antes y luego debuggear)
   //Cuando pare en el __NOP(); abre:Window → Show View → Expressions
@@ -137,6 +143,10 @@ int main(void)
 
   //Inicializacion del sensor con el .h y .c de github:
   memset(&distanceStr, 0, sizeof(distanceStr));
+  uint8_t addr = 0x29 << 1; // HAL usa 8-bit
+  if (HAL_I2C_IsDeviceReady(&hi2c1, addr, 10, 200) != HAL_OK) {
+      Error_Handler();
+  }
   initVL53L0X(1, &hi2c1);  // Inicializa el VL53L0X: el primer parámetro es el ID del sensor (1) y luego el I2C handle
   // (Opcional recomendado por el autor) Configuración para mejor precisión en distancias largas (1 ~ 2m)
   setSignalRateLimit(0.1f);
@@ -156,14 +166,16 @@ int main(void)
     /* USER CODE BEGIN 3 */
     // Aqui se programa el movimiento del motor del radar
     if(flag_Sentido_Horario == 1){
-    	i++;
+    	angulo_Radar_Horizontal++;
     }else{
-    	i--;
+    	angulo_Radar_Horizontal--;
     }
 
-    if(i == 2000) flag_Sentido_Horario =  0;
-    else if (i == 1000) flag_Sentido_Horario = 1;
-    htim2.Instance -> CCR1 = i;
+    if(angulo_Radar_Horizontal == 2000) flag_Sentido_Horario =  0;
+    else if (angulo_Radar_Horizontal == 1000) flag_Sentido_Horario = 1;
+    if (angulo_Radar_Horizontal < 1000) angulo_Radar_Horizontal = 1000;
+    if (angulo_Radar_Horizontal > 2000) angulo_Radar_Horizontal = 2000;
+    htim2.Instance -> CCR1 = angulo_Radar_Horizontal;
     // Fin codigo movimiento motor radar
 
     //Inicio lecturas del sensor de distancia
@@ -175,7 +187,7 @@ int main(void)
         if(distance_mm <= DISTANCIA_DE_DETECCION){
         	flag_Objetivo_Detectado = 1;
 
-        	sumatorio_Grados += i;
+        	sumatorio_Grados += angulo_Radar_Horizontal;
         	sumatorio_Distancia += (float)distance_mm;
         	numero_Objetivos++;
 
@@ -198,6 +210,14 @@ int main(void)
 
     }
     //Fin lecturas del sensor de distancia
+    //Inicio codigo movimiento horizontal motor torreta laser
+    Objetivo = get_Objetivo();
+
+    if (Objetivo != NULL) {
+        angulo_Laser_Horizontal = transforma_a_entero(Objetivo->angulo);
+        htim2.Instance->CCR2 = angulo_Laser_Horizontal;
+    }
+    //Fin codigo movimiento horizontal motor torreta laser
 
     HAL_Delay(2);
 
@@ -406,6 +426,11 @@ static void MX_TIM2_Init(void)
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.Pulse = 0;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
   }

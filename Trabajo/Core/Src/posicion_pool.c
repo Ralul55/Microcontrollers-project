@@ -18,6 +18,15 @@ static float transforma_g(uint16_t angulo){
 	float resultado=(((float)angulo*0.36f)-360.0f);
 	return resultado;
 }
+//Transformacion de grados a el valor entre 1000 (0º) y 2000 (360º) Se necesita  fuera asi que sin static
+uint16_t transforma_a_entero(float angulo){
+	float resultado = 1000.0f + (angulo * (1000.0f / 360.0f));
+
+	if (resultado < 1000.0f) resultado = 1000.0f; // Te lo copio ainara
+	if (resultado > 2000.0f) resultado = 2000.0f;
+
+	return (uint16_t)(resultado + 0.5f); //+0.5f es para evitar truncamientos raros en el cast
+}
 
 
 void pool_init(void){
@@ -30,6 +39,25 @@ void pool_init(void){
 }
 
 /////////////////////////////////
+// Para buscar un objetivo y fijarlo con el laser he creado esta función.
+// La variable j es static para no perder la cuenta cuando se devuelva un objetivo de todos los posibles para en otra iteracion poder apuntar al siguiente de la lista.
+Posicion* get_Objetivo(){
+	static uint8_t j = 0u;
+
+	    if (numero_huecos == MAXIMO_OBJETIVOS) {
+	        return NULL; // no hay objetivos
+	    }
+
+	    for (uint8_t k = 0u; k < MAXIMO_OBJETIVOS; k++) {
+	        uint8_t idx = (uint8_t)((j + k) % MAXIMO_OBJETIVOS);
+	        if (huecos_ocupados[idx] == 1u) {
+	            j = (uint8_t)((idx + 1u) % MAXIMO_OBJETIVOS);	 // siguiente para la próxima vez
+	            return &datos[idx];
+	        }
+	    }
+
+	    return NULL;
+}
 //reserva hueco
 bool objetivo_guarda_g(float distancia, float angulo){
 	//si no hay hueco retorna falso
@@ -51,6 +79,7 @@ bool objetivo_guarda_g(float distancia, float angulo){
 bool objetivo_guarda(float distancia, uint16_t angulo){
 	return objetivo_guarda_g(distancia, transforma_g(angulo));
 }
+
 
 /////////////////////////////////
 //libera hueco segun indice

@@ -23,11 +23,12 @@ typedef struct
 //las funciones _g son las que reciben el angulo en grados, si no recibe el valor entre 1000 (0º) y 2000 (360º)
 
 void pool_init(void);
-
 // Reserva hueco
 bool objetivo_guarda_g(float distancia, float angulo);
 //reserva hueco y hace transformacion a angulo
 bool objetivo_guarda(float distancia, uint16_t angulo);
+//Transformacion de grados a el valor entre 1000 (0º) y 2000 (360º)
+uint16_t transforma_a_entero(float angulo);
 
 //libera hueco segun indice
 bool objetivo_libera_indice(uint8_t indice);
@@ -41,6 +42,7 @@ bool objetivo_hueco_usado(uint8_t indice);
 
 //devuelve la informacion de posicion
 Posicion* objetivo(uint8_t indice);
+Posicion* get_Objetivo(void);
 
 
 //funciones para cosas mas "inutiles"
@@ -48,5 +50,6 @@ uint8_t objetivo_capacidad_total(void);
 //para obtener indice de objetivo en posicion concreta
 uint8_t objetivo_indice_angulo_g(float angulo);
 uint8_t objetivo_indice_angulo(uint16_t angulo);
+
 
 #endif /* INC_POSICION_POOL_H_ */
