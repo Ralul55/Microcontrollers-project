@@ -81,6 +81,14 @@ bool objetivo_guarda(float distancia, uint16_t angulo){
 }
 
 
+//comprobacion de objetivo existente
+bool objetivo_existente(uint16_t angulo_medio){
+	uint8_t i = objetivo_indice_angulo(angulo_medio);
+	if (i==OBJETIVO_NO_ENCONTRADO) return false;
+	else return true;
+}
+
+
 /////////////////////////////////
 //libera hueco segun indice
 bool objetivo_libera_indice(uint8_t indice){

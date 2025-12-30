@@ -95,16 +95,21 @@ int main(void)
 
   /* USER CODE BEGIN Init */
   int angulo_Radar_Horizontal = 1000;
+  //int angulo_Torreta_Horizontal = 1000;
   float sumatorio_Grados = 0;
   float media_Grados = 0;
 
   float sumatorio_Distancia = 0;
   float media_Distancia = 0;
 
-  int numero_Objetivos = 0;
+  uint8_t numero_Objetivos = 0; //no mas de 20 objetivos
 
   uint8_t flag_Sentido_Horario = 1;
   uint8_t flag_Objetivo_Detectado = 0;
+  //uint8_t flag_modo_manual = 1; //funcionamiento de la torreta deetrminado por modo manual o automatico. HAY QUE ASIGNARLE SWICH
+  uint8_t flag_siguiente_objetivo = 1; //se mantiene a uno para que busque objetivo
+  //uint8_t flag_disparo = 0;
+
 
   Posicion* Objetivo;
   int angulo_Laser_Horizontal = 1000;
@@ -191,13 +196,16 @@ int main(void)
         	sumatorio_Distancia += (float)distance_mm;
         	numero_Objetivos++;
 
-        }else {
+        }
+        else {
             if (flag_Objetivo_Detectado == 1) {
-
                 if (numero_Objetivos > 0) { //Es una condicion redundante, pero por seguridad la he puesto
                     media_Grados = sumatorio_Grados / numero_Objetivos;
                     media_Distancia = sumatorio_Distancia / numero_Objetivos;
-                    objetivo_guarda(media_Distancia, (uint16_t)media_Grados);
+                    if (!objetivo_existente((uint16_t)media_Grados)){ //si el objetivo no esta guardado en lista, se almacena
+                    	objetivo_guarda(media_Distancia, (uint16_t)media_Grados);
+
+                    }
                 }
 
                 // reset
@@ -206,22 +214,30 @@ int main(void)
                 numero_Objetivos = 0;
                 flag_Objetivo_Detectado = 0;
             }
+            else {
+            	if (objetivo_existente((uint16_t)angulo_Radar_Horizontal)){ //si el objetivo no esta guardado en lista, se almacena
+            		objetivo_libera((uint16_t)angulo_Radar_Horizontal);
+            	}
+            }
         }
 
     }
     //Fin lecturas del sensor de distancia
     //Inicio codigo movimiento horizontal motor torreta laser
-    Objetivo = get_Objetivo();
 
-    if (Objetivo != NULL) {
-        angulo_Laser_Horizontal = transforma_a_entero(Objetivo->angulo);
-        htim2.Instance->CCR2 = angulo_Laser_Horizontal;
+    if (flag_siguiente_objetivo ){
+    	Objetivo = get_Objetivo();
+
+    	    if (Objetivo != NULL) {
+    	        angulo_Laser_Horizontal = transforma_a_entero(Objetivo->angulo);
+    	        htim2.Instance->CCR2 = angulo_Laser_Horizontal;
+    	        flag_siguiente_objetivo=0; //hay que hacer mecanismo para que se vuelva a activar, por boton o modo automatico
+    	    }
+
     }
-    //Fin codigo movimiento horizontal motor torreta laser
+        //Fin codigo movimiento horizontal motor torreta laser
 
     HAL_Delay(2);
-
-
   }
   /* USER CODE END 3 */
 }

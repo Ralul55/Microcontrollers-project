@@ -5,7 +5,7 @@
 #include <stdbool.h> //para poder usar bool
 #include <stddef.h> //para poder usar NULL
 
-#define MAXIMO_OBJETIVOS 20u //los maximos objetivos es 21, es como maximo indice mas bien
+#define MAXIMO_OBJETIVOS 20u //los maximos objetivos
 #define OBJETIVO_NO_ENCONTRADO 255u
 #define DISTANCIA_DE_DETECCION 1500u // Definicion de la distancia maxima de detección de objetivos en mm
 
@@ -43,6 +43,9 @@ bool objetivo_hueco_usado(uint8_t indice);
 //devuelve la informacion de posicion
 Posicion* objetivo(uint8_t indice);
 Posicion* get_Objetivo(void);
+
+//comprobacion de objetivo existente
+bool objetivo_existente(uint16_t angulo);
 
 
 //funciones para cosas mas "inutiles"
