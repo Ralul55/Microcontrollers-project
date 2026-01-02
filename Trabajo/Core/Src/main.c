@@ -94,6 +94,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+  pool_init();
   int angulo_Radar_Horizontal = 1000;
   //int angulo_Torreta_Horizontal = 1000;
   float sumatorio_Grados = 0;
