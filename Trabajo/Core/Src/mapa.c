@@ -1,5 +1,6 @@
 #include "mapa.h"
 #include <stdlib.h>
+#include <math.h>
 
 
 static bool mapa_limites(int x, int y)
@@ -10,18 +11,30 @@ static bool mapa_limites(int x, int y)
 
 void mapa_init(void){
 	ILI9341_Init();
-	mapa_dibuja();
-    //codigo de prueba
-    mapa_dibuja_cuz(TAM_PANT_W / 2, TAM_PANT_H / 2, true);
+	mapa_rectangulo(40, 0, TAM_PANT_W-80, TAM_PANT_H, VERDE); //cuadrado
 
-    mapa_dibuja_cuz(TAM_PANT_W / 2 - 4, TAM_PANT_H / 2 - 4, false);
-    mapa_dibuja_cuz(TAM_PANT_H / 2 - 7, TAM_PANT_H / 2 - 7, false);
-    mapa_borra_cuz(TAM_PANT_H / 2 - 7, TAM_PANT_H / 2 - 7);
+	    mapa_dibuja_cuz(TAM_PANT_W / 2, TAM_PANT_H / 2, true);//habra simbolo para radar
 
+		//codigo de prueba
+
+	    Posicion p1;
+		Posicion p2;
+		Posicion p3;
+	    p1.angulo=90.0f;
+	    p2.angulo=0.0f;
+	    p3.angulo=270.0f;
+	    p1.distancia=20.0f;
+	    p2.distancia=1500.0f;
+	    p3.distancia=1400.0f;
+
+	    mapa_dibuja_cuz_g(&p1, false);
+	    mapa_dibuja_cuz_g(&p2, true);
+	    mapa_dibuja_cuz_g(&p3, true);
+	    mapa_borra_cuz(&p3);
 
 }
 
-void mapa_rectangulo(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color){
+void mapa_rectangulo(int x, int y, int w, int h, uint16_t color){
 
 	//respeto de margenes
 	if (w == 0 || h == 0) return;
@@ -52,7 +65,7 @@ void mapa_dibuja_linea(int x0, int y0, int x1, int y1, uint16_t color){
 
     while (1) {
         if (mapa_limites(x0, y0)) {
-            ILI9341_WritePixel((uint16_t)x0, (uint16_t)y0, color);
+            ILI9341_WritePixel((int)x0, (int)y0, color);
         }
         if (x0 == x1 && y0 == y1) break; //condicion de salida
 
@@ -71,15 +84,15 @@ void mapa_dibuja_linea(int x0, int y0, int x1, int y1, uint16_t color){
 
 
 void mapa_dibuja_cuz_g(Posicion *pos, bool marcado){
-	uint16_t coordenadas[2];
+	int coordenadas[2];
 	mapa_pasar_coordenadas(pos, coordenadas);
-	uint16_t x=coordenadas[0];
-	uint16_t y=coordenadas[1];
+	int x=coordenadas[0];
+	int y=coordenadas[1];
 	mapa_dibuja_cuz(x, y, marcado);
 }
 
 
-void mapa_dibuja_cuz(uint16_t x, uint16_t y, uint8_t marcado){
+void mapa_dibuja_cuz(int x, int y, uint8_t marcado){
 	uint16_t color;
 	if (marcado==0) color=NEGRO;
 	else if (marcado==1) color=ROJO;
@@ -95,23 +108,30 @@ void mapa_dibuja_cuz(uint16_t x, uint16_t y, uint8_t marcado){
 
 }
 
-void mapa_borra_cuz(uint16_t x, uint16_t y){
+void mapa_borra_cuz(Posicion *pos){
 	//pinta una cruz del color del fondo encima
 	uint8_t i = 3;
+	int coordenadas[2];
+	mapa_pasar_coordenadas(pos, coordenadas);
+	int x=coordenadas[0];
+	int y=coordenadas[1];
+
 	mapa_dibuja_cuz(x, y, i);
 }
 
 
 //recibe posicion y devuelve puntero a un array de coordenas
-void mapa_pasar_coordenadas(Posicion *pos, uint16_t coordenadas[2]){
+void mapa_pasar_coordenadas(Posicion *pos, int coordenadas[2]){
+	//el centro de la pantalla
+	int x0 = 40 + (int)(TAM_PANT_W - 80) / 2;
+	int y0 = (int)TAM_PANT_H / 2;
 
-	//codigo de conversion
+	//MAXIMA DISTANCIA DE DETECCION 1500, MAXIMOS PIXELES 240 (el radar esta en el centro 120), se hace conversion de distancia
+	float d=pos->distancia;
+	d=(d*(TAM_PANT_H-10)/2)/DISTANCIA_DE_DETECCION;
+
+	coordenadas[0]=x0+(d)*cos((pos->angulo)* (M_PI / 180.0)); //x
+	coordenadas[1]=y0-(d)*sin((pos->angulo)* (M_PI / 180.0)); //y
 
 }
 
-void mapa_dibuja(void){
-	mapa_rectangulo(40, 0, TAM_PANT_W-80, TAM_PANT_H, VERDE); //cuadrado
-	mapa_rectangulo(TAM_PANT_W-80, 0, TAM_PANT_W-80, TAM_PANT_H, VERDE); //cuadrado
-
-
-}

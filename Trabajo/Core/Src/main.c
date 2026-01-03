@@ -99,7 +99,6 @@ int main(void)
 	  HAL_Init();
 
   /* USER CODE BEGIN Init */
-  pool_init();
   int angulo_Radar_Horizontal = 1000;
   //int angulo_Torreta_Horizontal = 1000;
   float sumatorio_Grados = 0;
@@ -225,7 +224,7 @@ int main(void)
                 flag_Objetivo_Detectado = 0;
             }
             else {
-            	if (objetivo_existente((uint16_t)angulo_Radar_Horizontal)){ //si el objetivo no esta guardado en lista, se almacena
+            	if (objetivo_existente((uint16_t)angulo_Radar_Horizontal)){ //si el objetivo esta guardado en lista, se elimina
             		objetivo_libera((uint16_t)angulo_Radar_Horizontal);
             	}
             }

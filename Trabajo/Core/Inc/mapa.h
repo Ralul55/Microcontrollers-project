@@ -14,18 +14,17 @@
 
 void mapa_init(void);
 
-void mapa_rectangulo(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color);
+void mapa_rectangulo(int x, int y, int w, int h, uint16_t color);
 void mapa_dibuja_linea(int x0, int y0, int x1, int y1, uint16_t color);
 
 void mapa_dibuja_cuz_g(Posicion *pos, bool marcado);
 
-void mapa_dibuja_cuz(uint16_t x, uint16_t y, uint8_t marcado);
-void mapa_borra_cuz(uint16_t x, uint16_t y);
+void mapa_dibuja_cuz(int x, int y, uint8_t marcado);
+void mapa_borra_cuz(Posicion *pos);
 
 
 //recibe posicion y devuelve puntero a un array de coordenas
-void mapa_pasar_coordenadas(Posicion *pos, uint16_t coordenadas[2]);
+void mapa_pasar_coordenadas(Posicion *pos, int coordenadas[2]);
 
-void mapa_dibuja(void);
 
 #endif /* INC_MAPA_H_ */
