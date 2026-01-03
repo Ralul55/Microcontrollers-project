@@ -1,0 +1,9 @@
+../Core/Src/mapa.c:5:13:mapa_limites	5
+../Core/Src/mapa.c:11:6:mapa_init	1
+../Core/Src/mapa.c:24:6:mapa_rectangulo	9
+../Core/Src/mapa.c:40:6:mapa_dibuja_linea	8
+../Core/Src/mapa.c:73:6:mapa_dibuja_cuz_g	1
+../Core/Src/mapa.c:82:6:mapa_dibuja_cuz	3
+../Core/Src/mapa.c:98:6:mapa_borra_cuz	1
+../Core/Src/mapa.c:106:6:mapa_pasar_coordenadas	1
+../Core/Src/mapa.c:112:6:mapa_dibuja	1

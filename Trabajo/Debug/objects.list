@@ -1,5 +1,7 @@
 "./Core/Src/VL53L0X.o"
+"./Core/Src/ili9341.o"
 "./Core/Src/main.o"
+"./Core/Src/mapa.o"
 "./Core/Src/posicion_pool.o"
 "./Core/Src/stm32f4xx_hal_msp.o"
 "./Core/Src/stm32f4xx_it.o"
