@@ -11,7 +11,7 @@ static bool mapa_limites(int x, int y)
 
 void mapa_init(void){
 	ILI9341_Init();
-	mapa_rectangulo(40, 0, TAM_PANT_W-80, TAM_PANT_H, VERDE); //cuadrado
+	mapa_rectangulo(40, 0, TAM_PANT_W-80, TAM_PANT_H, FONDO); //cuadrado
 
 	    mapa_dibuja_cuz(TAM_PANT_W / 2, TAM_PANT_H / 2, true);//habra simbolo para radar
 
@@ -27,9 +27,9 @@ void mapa_init(void){
 	    p2.distancia=1500.0f;
 	    p3.distancia=1400.0f;
 
-	    mapa_dibuja_cuz_g(&p1, false);
-	    mapa_dibuja_cuz_g(&p2, true);
-	    mapa_dibuja_cuz_g(&p3, true);
+	    mapa_dibuja_cuz_g(&p1);
+	    mapa_dibuja_cuz_g(&p2);
+	    mapa_dibuja_cuz_g(&p3);
 	    mapa_borra_cuz(&p3);
 
 }
@@ -83,20 +83,27 @@ void mapa_dibuja_linea(int x0, int y0, int x1, int y1, uint16_t color){
 
 
 
-void mapa_dibuja_cuz_g(Posicion *pos, bool marcado){
+void mapa_dibuja_cuz_g(Posicion *pos){
 	int coordenadas[2];
 	mapa_pasar_coordenadas(pos, coordenadas);
 	int x=coordenadas[0];
 	int y=coordenadas[1];
-	mapa_dibuja_cuz(x, y, marcado);
+	mapa_dibuja_cuz(x, y, pos->marcado);
 }
 
 
 void mapa_dibuja_cuz(int x, int y, uint8_t marcado){
 	uint16_t color;
-	if (marcado==0) color=NEGRO;
-	else if (marcado==1) color=ROJO;
-	else color=VERDE;
+	switch (marcado) {
+		case 0: //objetivo normal
+			color=NEGRO;
+			break;
+		case 1: //objetivo marcado por la torreta
+			color=ROJO;
+			break;
+		case 2: //borrado
+			color=FONDO;
+	}
 
 	mapa_dibuja_linea(x-4, y-4, x+4, y+4, color);
 	mapa_dibuja_linea(x-3, y-4, x+5, y+4, color);
@@ -110,7 +117,8 @@ void mapa_dibuja_cuz(int x, int y, uint8_t marcado){
 
 void mapa_borra_cuz(Posicion *pos){
 	//pinta una cruz del color del fondo encima
-	uint8_t i = 3;
+	uint8_t i = 2; //indicador de que tiene que ser el color fondo
+
 	int coordenadas[2];
 	mapa_pasar_coordenadas(pos, coordenadas);
 	int x=coordenadas[0];
@@ -133,5 +141,14 @@ void mapa_pasar_coordenadas(Posicion *pos, int coordenadas[2]){
 	coordenadas[0]=x0+(d)*cos((pos->angulo)* (M_PI / 180.0)); //x
 	coordenadas[1]=y0-(d)*sin((pos->angulo)* (M_PI / 180.0)); //y
 
+}
+
+void mapa_dibuja(void){
+	for (uint8_t i = 0u; i < MAXIMO_OBJETIVOS; i++){
+			if (objetivo_hueco_usado(i)) {
+				Posicion *p = objetivo(i);
+			    mapa_dibuja_cuz_g(p);
+			}
+		}
 }
 

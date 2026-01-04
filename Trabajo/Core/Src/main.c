@@ -225,6 +225,10 @@ int main(void)
             }
             else {
             	if (objetivo_existente((uint16_t)angulo_Radar_Horizontal)){ //si el objetivo esta guardado en lista, se elimina
+            		//borra el objetivo del mapa
+            		Posicion *p = objetivo(objetivo_indice_angulo((uint16_t)angulo_Radar_Horizontal));
+            		mapa_borra_cuz(p);
+
             		objetivo_libera((uint16_t)angulo_Radar_Horizontal);
             	}
             }
@@ -245,6 +249,8 @@ int main(void)
 
     }
         //Fin codigo movimiento horizontal motor torreta laser
+
+    mapa_dibuja(); //dibuja los objetivos
 
     HAL_Delay(2);
   }

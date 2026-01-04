@@ -34,6 +34,7 @@ void pool_init(void){
 		huecos_ocupados[i] = 0u;
 		datos[i].distancia = 0.0f;
 		datos[i].angulo = 0.0f;
+	    datos[i].marcado=0u;
 	}
 	numero_huecos = MAXIMO_OBJETIVOS;
 }
@@ -48,10 +49,12 @@ Posicion* get_Objetivo(){
 	        return NULL; // no hay objetivos
 	    }
 
+	    if(datos[j].marcado==1u){datos[j].marcado=0u;} //se desmarca el objetivo anterior (solo se puede marcar un objetivo)
 	    for (uint8_t k = 0u; k < MAXIMO_OBJETIVOS; k++) {
 	        uint8_t idx = (uint8_t)((j + k) % MAXIMO_OBJETIVOS);
 	        if (huecos_ocupados[idx] == 1u) {
 	            j = (uint8_t)((idx + 1u) % MAXIMO_OBJETIVOS);	 // siguiente para la próxima vez
+	            datos[j].marcado=1u; //se marca como objetivo
 	            return &datos[idx];
 	        }
 	    }
@@ -68,6 +71,7 @@ bool objetivo_guarda_g(float distancia, float angulo){
 	    	huecos_ocupados[i] = 1u;
 	        datos[i].distancia = distancia;
 	        datos[i].angulo = angulo;
+	        datos[i].marcado=0u;
 	        numero_huecos--;
 	        return true;
 	    }
@@ -98,6 +102,7 @@ bool objetivo_libera_indice(uint8_t indice){
 	huecos_ocupados[indice] = 0u;
 	datos[indice].distancia = 0.0f;
 	datos[indice].angulo = 0.0f;
+    datos[indice].marcado=0u;
     numero_huecos++;
     return true;
 }

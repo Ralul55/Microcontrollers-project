@@ -11,9 +11,10 @@
 
 typedef struct
 {
-	//uint8_t indice; //se puede meter o no para ponerle "nombre" a cada objetivo
 	float distancia;
 	float angulo; //en grados
+	uint8_t marcado; //si esta marcado como objetivo o no
+
 } Posicion;
 
 //vamos a crear una fallsa memoria dinamica, se definen unicamente funciones para su correcto uso
