@@ -59,4 +59,7 @@ uint8_t objetivo_indice_angulo(uint16_t angulo);
 
 void objetivo_establecer_abatido(uint16_t angulo);
 
+void pool_reset(void);
+
+
 #endif /* INC_POSICION_POOL_H_ */

@@ -1,5 +1,7 @@
 #include "posicion_pool.h"
 #include <math.h>
+#include <stdbool.h> //para poder usar bool
+
 
 //gestion de la informacion estatica, solo 1 instancia
 static Posicion datos[MAXIMO_OBJETIVOS];
@@ -175,3 +177,12 @@ void objetivo_establecer_abatido(uint16_t angulo){
 	numero_abatidos++;
 	numero_objetivos--;
 }
+
+void pool_reset(void){
+	for (uint8_t i = 0u; i < MAXIMO_OBJETIVOS; i++){
+		if (huecos_ocupados[i] == 1u) {
+			(void)objetivo_libera_indice(i); //se hace cast a void, se puede hacer comprobacion
+		}
+	}
+}
+

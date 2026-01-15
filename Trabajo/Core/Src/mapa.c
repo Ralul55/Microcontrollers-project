@@ -154,3 +154,13 @@ void mapa_dibuja(void){
 		}
 }
 
+void mapa_reset(void){
+	for (uint8_t i = 0u; i < MAXIMO_OBJETIVOS; i++){
+			if (objetivo_hueco_usado(i)) {
+				Posicion *p = objetivo(i);
+				mapa_borra_cuz(p);
+			}
+		}
+}
+
+

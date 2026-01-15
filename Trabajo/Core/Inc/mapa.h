@@ -29,4 +29,6 @@ void mapa_pasar_coordenadas(Posicion *pos, int coordenadas[2]);
 
 void mapa_dibuja(void);
 
+void mapa_reset(void);
+
 #endif /* INC_MAPA_H_ */
