@@ -4,7 +4,10 @@
 //gestion de la informacion estatica, solo 1 instancia
 static Posicion datos[MAXIMO_OBJETIVOS];
 static uint8_t huecos_ocupados[MAXIMO_OBJETIVOS]; //se encarga de anotar si el hueco esta libre (0) o ocupado (1)
+
 static uint8_t numero_huecos = 0u;
+static uint8_t numero_objetivos = 0u;
+static uint8_t numero_abatidos = 0u;
 
 //se necesita porque aparentemente comparar 2 floats no es trivial
 static const float margen_igualdad = 0.01f;  // 0,01 grados
@@ -13,19 +16,20 @@ static const float margen_igualdad = 0.01f;  // 0,01 grados
 //es static, solo se puede usar desde aqui, si se necesita fuera pues se quita el static
 static float transforma_g(uint16_t angulo){
 	//comprobaciones que no se si deberian estar
-	//if (angulo<1000){return 0.0f;}
-	//if (angulo>2000){return 360.0f;}
-	float resultado=(((float)angulo*0.36f)-360.0f);
-	return resultado;
+		float resultado=(((float)angulo - 500.0) * 360.0 / 2000.0);
+		if (angulo<500){return 0.0f;}
+		if (angulo>2500){return 360.0f;}
+		return resultado;
 }
+
 //Transformacion de grados a el valor entre 1000 (0º) y 2000 (360º) Se necesita  fuera asi que sin static
 uint16_t transforma_a_entero(float angulo){
-	float resultado = 1000.0f + (angulo * (1000.0f / 360.0f));
+	float resultado = (500.0 + (angulo * 2000.0 / 360.0));
 
-	if (resultado < 1000.0f) resultado = 1000.0f; // Te lo copio ainara
-	if (resultado > 2000.0f) resultado = 2000.0f;
+		if (resultado < 500.0f) resultado = 500.0f;
+		if (resultado > 2500.0f) resultado = 2500.0f;
 
-	return (uint16_t)(resultado + 0.5f); //+0.5f es para evitar truncamientos raros en el cast
+		return (uint16_t)(resultado + 0.5f); //+0.5f es para evitar truncamientos raros en el cast
 }
 
 
@@ -37,6 +41,8 @@ void pool_init(void){
 	    datos[i].marcado=0u;
 	}
 	numero_huecos = MAXIMO_OBJETIVOS;
+	numero_objetivos = 0u;
+	numero_abatidos = 0u;
 }
 
 /////////////////////////////////
@@ -53,6 +59,10 @@ Posicion* get_Objetivo(){
 	    for (uint8_t k = 0u; k < MAXIMO_OBJETIVOS; k++) {
 	        uint8_t idx = (uint8_t)((j + k) % MAXIMO_OBJETIVOS);
 	        if (huecos_ocupados[idx] == 1u) {
+
+	        	//si el objetivo encontrado esta abatido, si es asi, pasa al siguiente
+	        	if (datos[idx].marcado==2u){continue;}
+
 	            j = (uint8_t)((idx + 1u) % MAXIMO_OBJETIVOS);	 // siguiente para la próxima vez
 	            datos[j].marcado=1u; //se marca como objetivo
 	            return &datos[idx];
@@ -73,6 +83,7 @@ bool objetivo_guarda_g(float distancia, float angulo){
 	        datos[i].angulo = angulo;
 	        datos[i].marcado=0u;
 	        numero_huecos--;
+	        numero_objetivos++;
 	        return true;
 	    }
 	}
@@ -98,14 +109,17 @@ bool objetivo_existente(uint16_t angulo_medio){
 bool objetivo_libera_indice(uint8_t indice){
 	if (indice >= MAXIMO_OBJETIVOS){ return false;}
 	if (huecos_ocupados[indice] == 0u){ return false;}
+		if (datos[indice].marcado==2u){numero_abatidos--;}
+		else { numero_objetivos--; }
 
-	huecos_ocupados[indice] = 0u;
-	datos[indice].distancia = 0.0f;
-	datos[indice].angulo = 0.0f;
-    datos[indice].marcado=0u;
-    numero_huecos++;
+		huecos_ocupados[indice] = 0u;
+		datos[indice].distancia = 0.0f;
+		datos[indice].angulo = 0.0f;
+		datos[indice].marcado=0u;
+		numero_huecos++;
     return true;
 }
+
 //libera hueco segun la posicion del angulo, en mi cabeza asi es como funcionaria
 bool objetivo_libera_g(float angulo){
 	uint8_t i = objetivo_indice_angulo_g(angulo);
@@ -133,10 +147,9 @@ Posicion* objetivo(uint8_t indice){
 	    return &datos[indice];
 }
 
-uint8_t objetivo_capacidad_total(void){
-	return MAXIMO_OBJETIVOS;
-}
-
+uint8_t objetivo_capacidad_total(void){ return MAXIMO_OBJETIVOS; }
+uint8_t objetivo_objetivos_total(void){ return numero_objetivos; }
+uint8_t objetivo_abatidos_total(void){ return numero_abatidos; }
 
 /////////////////////////////////
 //devuelve indice
@@ -153,4 +166,12 @@ uint8_t objetivo_indice_angulo_g(float angulo){
 
 uint8_t objetivo_indice_angulo(uint16_t angulo){
 	return objetivo_indice_angulo_g(transforma_g(angulo));
+}
+
+/////////////////////////////////
+//establecer indice como abatido
+void objetivo_establecer_abatido(uint16_t angulo){
+	datos[objetivo_indice_angulo(angulo)].marcado=2u;
+	numero_abatidos++;
+	numero_objetivos--;
 }

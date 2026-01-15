@@ -48,12 +48,15 @@ Posicion* get_Objetivo(void);
 //comprobacion de objetivo existente
 bool objetivo_existente(uint16_t angulo);
 
-
 //funciones para cosas mas "inutiles"
 uint8_t objetivo_capacidad_total(void);
+uint8_t objetivo_objetivos_total(void);
+uint8_t objetivo_abatidos_total(void);
+
 //para obtener indice de objetivo en posicion concreta
 uint8_t objetivo_indice_angulo_g(float angulo);
 uint8_t objetivo_indice_angulo(uint16_t angulo);
 
+void objetivo_establecer_abatido(uint16_t angulo);
 
 #endif /* INC_POSICION_POOL_H_ */

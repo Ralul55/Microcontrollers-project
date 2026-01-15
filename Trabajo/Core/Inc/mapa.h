@@ -10,6 +10,7 @@
 #define NEGRO 0x0000
 #define BLANCO 0xFFFF
 #define ROJO 0xF000
+#define GRIS 0x8410
 #define FONDO 0x4A64 //verde militar
 
 void mapa_init(void);

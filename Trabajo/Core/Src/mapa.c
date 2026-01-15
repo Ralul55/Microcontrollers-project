@@ -101,7 +101,9 @@ void mapa_dibuja_cuz(int x, int y, uint8_t marcado){
 		case 1: //objetivo marcado por la torreta
 			color=ROJO;
 			break;
-		case 2: //borrado
+		case 2: //objetivo abatido
+			color=GRIS;
+		case 3: //borrado
 			color=FONDO;
 	}
 
@@ -117,7 +119,7 @@ void mapa_dibuja_cuz(int x, int y, uint8_t marcado){
 
 void mapa_borra_cuz(Posicion *pos){
 	//pinta una cruz del color del fondo encima
-	uint8_t i = 2; //indicador de que tiene que ser el color fondo
+	uint8_t i = 3; //indicador de que tiene que ser el color fondo
 
 	int coordenadas[2];
 	mapa_pasar_coordenadas(pos, coordenadas);

@@ -137,10 +137,10 @@ int main(void)
   pool_init();
   mapa_init();
 
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
-  htim2.Instance->CCR1 = 1500; // centro
-  htim2.Instance->CCR2 = 1500; // centro
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+  htim1.Instance->CCR1 = 1500; // centro
+  htim1.Instance->CCR2 = 1500; // centro
 
   //Prueba de funcionamiento del sensor laser (Hay que conectar en sensor laser antes y luego debuggear)
   //Cuando pare en el __NOP(); abre:Window → Show View → Expressions
@@ -184,7 +184,7 @@ int main(void)
     else if (angulo_Radar_Horizontal == 1000) flag_Sentido_Horario = 1;
     if (angulo_Radar_Horizontal < 1000) angulo_Radar_Horizontal = 1000;
     if (angulo_Radar_Horizontal > 2000) angulo_Radar_Horizontal = 2000;
-    htim2.Instance -> CCR1 = angulo_Radar_Horizontal;
+    htim1.Instance -> CCR1 = angulo_Radar_Horizontal;
     // Fin codigo movimiento motor radar
 
     //Inicio lecturas del sensor de distancia
@@ -238,7 +238,7 @@ int main(void)
 
     	    if (Objetivo != NULL) {
     	        angulo_Laser_Horizontal = transforma_a_entero(Objetivo->angulo);
-    	        htim2.Instance->CCR2 = angulo_Laser_Horizontal;
+    	        htim1.Instance->CCR2 = angulo_Laser_Horizontal;
     	        flag_siguiente_objetivo=0; //hay que hacer mecanismo para que se vuelva a activar, por boton o modo automatico
     	    }
 
