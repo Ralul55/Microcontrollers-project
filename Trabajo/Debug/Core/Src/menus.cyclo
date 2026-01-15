@@ -1,0 +1,8 @@
+../Core/Src/menus.c:15:20:fire_str	2
+../Core/Src/menus.c:20:20:rot_str	3
+../Core/Src/menus.c:29:20:m2_preview_str	2
+../Core/Src/menus.c:34:20:m3_preview_str	3
+../Core/Src/menus.c:41:13:sync_previews_with_selected	2
+../Core/Src/menus.c:48:13:Menus_Draw	5
+../Core/Src/menus.c:79:6:Menus_Init	1
+../Core/Src/menus.c:89:6:Menus_Task	13

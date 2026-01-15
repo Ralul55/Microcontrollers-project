@@ -26,6 +26,11 @@
 #include "mapa.h"
 #include <stdio.h>
 #include <string.h>
+#include "liquidcrystal_i2c.h"
+#include "lcd.h"
+#include "botones.h"
+#include "system_vars.h"
+#include "menus.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,6 +64,29 @@ TIM_HandleTypeDef htim1;
   statInfo_t_VL53L0X distanceStr; // Estructura de “estadísticas/estado” que usa la librería
   volatile uint16_t distance_mm = 0; // Variable donde guardaremos la distancia (mm)
 
+  //generales
+  uint16_t num_objetivos;
+  uint16_t num_abatidos;
+
+  FireMode modo_disparo;
+  RotMode  modo_rotacion;
+
+  uint16_t grados_rot;
+  uint16_t prueba_pote_2;
+
+  //variables Potenciometro ADC
+  volatile uint16_t  lectura_pote_1;
+  volatile uint16_t  lectura_pote_2;
+  volatile uint8_t  adc_ready_1 = 0;
+  volatile uint8_t  adc_ready_2 = 0;
+
+  //botones
+  Boton b_cambio_menu;
+  Boton b_seleccion_menu;
+  Boton b_seleccion_objetivo;
+  Boton b_disparo;
+  Boton b_RESET;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -76,6 +104,29 @@ static void MX_TIM1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+//Potenciometro ADC
+void ADC_IRQHandler(void)
+{
+  HAL_ADC_IRQHandler(&hadc1);
+  HAL_ADC_IRQHandler(&hadc2);
+}
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
+{
+  if (hadc->Instance == ADC1)
+  {
+    lectura_pote_1 = (uint16_t)HAL_ADC_GetValue(hadc);
+    adc_ready_1 = 1;
+    //HAL_ADC_Start_IT(&hadc1);
+  }
+  else if (hadc->Instance == ADC2)
+  {
+    lectura_pote_2 = (uint16_t)HAL_ADC_GetValue(hadc);
+    adc_ready_2 = 1;
+    //HAL_ADC_Start_IT(&hadc2);
+  }
+}
 
 /* USER CODE END 0 */
 
@@ -137,6 +188,18 @@ int main(void)
   pool_init();
   mapa_init();
 
+  //Potenciometro ADC
+  HAL_NVIC_EnableIRQ(ADC_IRQn);
+
+  if (HAL_ADC_Start_IT(&hadc1) != HAL_OK)
+  {
+	  Error_Handler();
+  }
+  if (HAL_ADC_Start_IT(&hadc2) != HAL_OK)
+  {
+  	  Error_Handler();
+  }
+
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
   htim1.Instance->CCR1 = 1500; // centro
@@ -151,6 +214,7 @@ int main(void)
   volatile int sensor_ok = (ok == HAL_OK);  // <-- esto se mira en Watch
   __NOP();*/
 
+  /*
   //Inicializacion del sensor con el .h y .c de github:
   memset(&distanceStr, 0, sizeof(distanceStr));
   uint8_t addr = 0x29 << 1; // HAL usa 8-bit
@@ -163,6 +227,18 @@ int main(void)
   setVcselPulsePeriod(VcselPeriodPreRange, 18);
   setVcselPulsePeriod(VcselPeriodFinalRange, 14);
   setMeasurementTimingBudget(200000); //  (priorizando precisión para medir mayores distancias, a costa de la velocidad) Si se requiere más velocidad disminuir el TimingBudget
+  */
+
+  //Botones
+  Boton_Init(&b_cambio_menu, GPIOC, Btn_1_Pin, 0);             //pull-up interno
+  Boton_Init(&b_seleccion_menu,  GPIOC, Btn_2_Pin, 0);         //pull-up interno
+  Boton_Init(&b_seleccion_objetivo,  GPIOA, Btn_3_Pin, 0);     //pull-up interno
+  Boton_Init(&b_disparo,  GPIOA, Btn_4_Pin, 0);                //pull-up interno
+  Boton_Init(&b_RESET,  GPIOC, Btn_4_Pin, 0);                  //pull-up interno
+
+  //Inicializacion archivos LCD
+  HD44780_Init(2);
+  LCD_Init();
 
   /* USER CODE END 2 */
 
@@ -174,6 +250,8 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     // Aqui se programa el movimiento del motor del radar
+
+	/*
     if(flag_Sentido_Horario == 1){
     	angulo_Radar_Horizontal++;
     }else{
@@ -244,10 +322,45 @@ int main(void)
 
     }
         //Fin codigo movimiento horizontal motor torreta laser
+    */
 
     mapa_dibuja(); //dibuja los objetivos
 
-    HAL_Delay(2);
+//-------------------------CODE POTES (INTERRUPCIONES) ----------------------------------
+
+    //prueba potes
+    if (adc_ready_1)
+    {
+    	adc_ready_1 = 0;
+    	grados_rot = (uint16_t)((lectura_pote_1 * 180U) / 4095U);
+    }
+    if (adc_ready_2)
+    {
+        adc_ready_2 = 0;
+        prueba_pote_2 = (uint16_t)((lectura_pote_2 * 300U) / 4095U);
+    }
+    static uint32_t t_adc = 0;
+
+    //hacemos que se relancen las interrupciones cada 10ms para no comer la CPU
+    if (HAL_GetTick() - t_adc >= 10) {
+      t_adc = HAL_GetTick();
+      HAL_ADC_Start_IT(&hadc1);
+      HAL_ADC_Start_IT(&hadc2);
+    }
+
+//---------------------------------------------------------------------------------------
+
+    //usamos los botones para interactuar con el menu
+    uint32_t now = HAL_GetTick();
+   	BtnEvent evM = Boton_Update(&b_cambio_menu, now);
+   	BtnEvent evS = Boton_Update(&b_seleccion_menu,  now);
+
+   	//actualizamos menu
+   	Menus_Task(evM, evS, now);
+
+   	//actualizamos LCD para mostrar cambios
+   	LCD_Task();
+
   }
   /* USER CODE END 3 */
 }
@@ -321,7 +434,7 @@ static void MX_ADC1_Init(void)
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc1.Init.ScanConvMode = DISABLE;
+  hadc1.Init.ScanConvMode = ENABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
@@ -339,7 +452,7 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_2;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  sConfig.SamplingTime = ADC_SAMPLETIME_84CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -373,7 +486,7 @@ static void MX_ADC2_Init(void)
   hadc2.Instance = ADC2;
   hadc2.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
   hadc2.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc2.Init.ScanConvMode = DISABLE;
+  hadc2.Init.ScanConvMode = ENABLE;
   hadc2.Init.ContinuousConvMode = DISABLE;
   hadc2.Init.DiscontinuousConvMode = DISABLE;
   hadc2.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
@@ -391,7 +504,7 @@ static void MX_ADC2_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_3;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  sConfig.SamplingTime = ADC_SAMPLETIME_84CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -611,10 +724,10 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, RST_PANTALLA_Pin|DC_PANTALLA_Pin|CS_PANTALLA_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, RST_PANTALLA_Pin|DC_PANTALLA_Pin|CS_PANTALLA_Pin|Lidar_xshutdown_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : RST_PANTALLA_Pin DC_PANTALLA_Pin CS_PANTALLA_Pin */
-  GPIO_InitStruct.Pin = RST_PANTALLA_Pin|DC_PANTALLA_Pin|CS_PANTALLA_Pin;
+  /*Configure GPIO pins : RST_PANTALLA_Pin DC_PANTALLA_Pin CS_PANTALLA_Pin Lidar_xshutdown_Pin */
+  GPIO_InitStruct.Pin = RST_PANTALLA_Pin|DC_PANTALLA_Pin|CS_PANTALLA_Pin|Lidar_xshutdown_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

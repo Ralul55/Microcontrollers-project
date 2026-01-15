@@ -2,6 +2,7 @@
 #include "lcd.h"
 #include "system_vars.h"
 #include <string.h>
+#include "posicion_pool.h"
 
 typedef enum { MENU_1 = 0, MENU_2, MENU_3, MENU_4 } Menu;
 
@@ -49,8 +50,8 @@ static void Menus_Draw(void)
     switch (menu_actual)
     {
         case MENU_1:
-            LCD_PrintfVar(0, "NUM OBJETIV: %3u", (uint32_t)prueba_pote_2);
-            LCD_PrintfVar(1, "NUM ABATIDOS: %3u", (uint32_t)num_abatidos);
+            LCD_PrintfVar(0, "NUM OBJETIV: %3u", (uint32_t)objetivo_objetivos_total);
+            LCD_PrintfVar(1, "NUM ABATIDOS: %3u", (uint32_t)objetivo_abatidos_total);
             break;
 
         case MENU_2:

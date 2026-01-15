@@ -75,6 +75,8 @@ void Error_Handler(void);
 #define Btn_3_GPIO_Port GPIOA
 #define Btn_4_Pin GPIO_PIN_9
 #define Btn_4_GPIO_Port GPIOA
+#define Lidar_xshutdown_Pin GPIO_PIN_5
+#define Lidar_xshutdown_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
 
