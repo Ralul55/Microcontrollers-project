@@ -165,18 +165,21 @@ uint8_t objetivo_indice_angulo(uint16_t angulo){
 
 // Esta función combina todas las anteriores para hacer código funcional, la declaro aqui para dejar mas limpio el main.
 void detectar_Objetivo(VL53L0X_RangingMeasurementData_t *Ranging, uint16_t angulo_actual){
+	//Declara todas las variables necesarias de la funcion
 	static uint32_t t_last = 0;
 	static float sumatorio_Grados = 0;
 	static float sumatorio_Distancia = 0;
 	static uint8_t numero_Objetivos = 0;
 	static uint8_t flag_Objetivo_Detectado = 0;
 
+	// Si ha pasado menos de 50 ms sale de la funcion para no bloquear el movimiento del motor del radar y que sea más fluido
 	if (HAL_GetTick() - t_last < 50) return;
 	t_last = HAL_GetTick();
 
+	// Pilla la distancia que mide el radar
 	uint16_t distance_mm = Ranging->RangeMilliMeter;
 
-
+	// Si la distancia que detecta es menor que la distancia max de detccion queire decir que ha detectado un objetivo
 	if (distance_mm <= DISTANCIA_DE_DETECCION){
 	    flag_Objetivo_Detectado = 1;
 	    sumatorio_Grados += angulo_actual;
@@ -184,13 +187,19 @@ void detectar_Objetivo(VL53L0X_RangingMeasurementData_t *Ranging, uint16_t angul
 	    numero_Objetivos++;
 	}
 	else {
+		// Si deja de detectar un objetivo y la ultima vez que se ejecuto esta funcion la flag de objetivo detectado estaba en uno quire decir que ha dejado de detectar el objetivo
+		// que estaba detectando antes, por lo tanto procede a realizar el código de dentro
 	    if (flag_Objetivo_Detectado == 1) {
 	        if (numero_Objetivos > 0) { //Es una condicion redundante, pero por seguridad la he puesto
+
+	        	// Realiza la media de las posiciones y los angulos del obtivo anterior
 	            media_Grados = sumatorio_Grados / numero_Objetivos;
 	            media_Distancia = sumatorio_Distancia / numero_Objetivos;
 
+	            // margen
 	            uint16_t ang_med = (uint16_t)(media_Grados + 0.5f);
 
+	            // Guarda el objetivo
 	            if (!objetivo_existente(ang_med)){ //si el objetivo no esta guardado en lista, se almacena
 	            	objetivo_guarda(media_Distancia, ang_med);
 	            }
