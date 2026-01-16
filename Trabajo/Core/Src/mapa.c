@@ -103,8 +103,10 @@ void mapa_dibuja_cuz(int x, int y, uint8_t marcado){
 			break;
 		case 2: //objetivo abatido
 			color=GRIS;
+			break;
 		case 3: //borrado
 			color=FONDO;
+			break;
 	}
 
 	mapa_dibuja_linea(x-4, y-4, x+4, y+4, color);
