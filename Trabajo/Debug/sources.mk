@@ -25,4 +25,10 @@ SUBDIRS := \
 Core/Src \
 Core/Startup \
 Drivers/STM32F4xx_HAL_Driver/Src \
+Drivers/VL53L0X/core/src \
+Drivers/VL53L0X/platform/src \
+Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Src \
+Middlewares/ST/STM32_USB_Host_Library/Core/Src \
+USB_HOST/App \
+USB_HOST/Target \
 
