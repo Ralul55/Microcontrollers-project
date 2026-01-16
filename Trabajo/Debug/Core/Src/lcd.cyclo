@@ -1,0 +1,9 @@
+../Core/Src/lcd.c:14:13:make_line	5
+../Core/Src/lcd.c:27:13:print_row	1
+../Core/Src/lcd.c:36:6:LCD_Init	2
+../Core/Src/lcd.c:51:6:LCD_Task	4
+../Core/Src/lcd.c:67:6:LCD_PrintfLine	3
+../Core/Src/lcd.c:82:6:LCD_PrintfVar	2
+../Core/Src/lcd.c:94:6:LCD_PrintfStr	3
+../Core/Src/lcd.c:106:6:LCD_WriteAt	8
+../Core/Src/lcd.c:128:6:LCD_Clear	2

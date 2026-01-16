@@ -1,0 +1,3 @@
+../Core/Src/motor_radar_movimiento.c:6:6:set_servo_radar	1
+../Core/Src/motor_radar_movimiento.c:11:6:movimiento_radar	4
+../Core/Src/motor_radar_movimiento.c:24:10:radar_get_angulo	1

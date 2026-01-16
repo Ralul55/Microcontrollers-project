@@ -1,6 +1,11 @@
 #include "posicion_pool.h"
 #include <math.h>
 
+// Variables para uso en el main (ver el final de este archivo), todas son static porque me interesa tener una insatncia de ellos y que mantengan su valor anterior en la funcion detectar_Objetivo()
+static float media_Grados = 0;
+static float media_Distancia = 0;
+
+
 //gestion de la informacion estatica, solo 1 instancia
 static Posicion datos[MAXIMO_OBJETIVOS];
 static uint8_t huecos_ocupados[MAXIMO_OBJETIVOS]; //se encarga de anotar si el hueco esta libre (0) o ocupado (1)
@@ -153,4 +158,59 @@ uint8_t objetivo_indice_angulo_g(float angulo){
 
 uint8_t objetivo_indice_angulo(uint16_t angulo){
 	return objetivo_indice_angulo_g(transforma_g(angulo));
+}
+
+
+
+
+// Esta función combina todas las anteriores para hacer código funcional, la declaro aqui para dejar mas limpio el main.
+void detectar_Objetivo(VL53L0X_RangingMeasurementData_t *Ranging, uint16_t angulo_actual){
+	static uint32_t t_last = 0;
+	static float sumatorio_Grados = 0;
+	static float sumatorio_Distancia = 0;
+	static uint8_t numero_Objetivos = 0;
+	static uint8_t flag_Objetivo_Detectado = 0;
+
+	if (HAL_GetTick() - t_last < 50) return;
+	t_last = HAL_GetTick();
+
+	uint16_t distance_mm = Ranging->RangeMilliMeter;
+
+
+	if (distance_mm <= DISTANCIA_DE_DETECCION){
+	    flag_Objetivo_Detectado = 1;
+	    sumatorio_Grados += angulo_actual;
+	    sumatorio_Distancia += (float)distance_mm;
+	    numero_Objetivos++;
+	}
+	else {
+	    if (flag_Objetivo_Detectado == 1) {
+	        if (numero_Objetivos > 0) { //Es una condicion redundante, pero por seguridad la he puesto
+	            media_Grados = sumatorio_Grados / numero_Objetivos;
+	            media_Distancia = sumatorio_Distancia / numero_Objetivos;
+
+	            uint16_t ang_med = (uint16_t)(media_Grados + 0.5f);
+
+	            if (!objetivo_existente(ang_med)){ //si el objetivo no esta guardado en lista, se almacena
+	            	objetivo_guarda(media_Distancia, ang_med);
+	            }
+	        }
+
+	        // reset
+	        sumatorio_Grados = 0;
+	        sumatorio_Distancia = 0;
+	        numero_Objetivos = 0;
+	        flag_Objetivo_Detectado = 0;
+	    }
+	    else {
+	    	if (objetivo_existente(angulo_actual)){ //si el objetivo esta guardado en lista, se elimina
+	    		//borra el objetivo del mapa
+	            Posicion *p = objetivo(objetivo_indice_angulo(angulo_actual));
+	            if (p != NULL) {
+	            	mapa_borra_cuz(p);
+	            }
+	            objetivo_libera(angulo_actual);
+	        }
+	    }
+	}
 }

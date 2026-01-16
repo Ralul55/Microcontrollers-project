@@ -22,7 +22,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "VL53L0X.h"
+#include "sensor_distancia.h"
+#include "motor_radar_movimiento.h"
+#include "motor_laser_movimiento.h"
 #include "posicion_pool.h"
 #include "mapa.h"
 #include <stdio.h>
@@ -53,12 +55,10 @@ SPI_HandleTypeDef hspi1;
 SPI_HandleTypeDef hspi2;
 DMA_HandleTypeDef hdma_spi2_tx;
 
-TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN PV */
-
-  statInfo_t_VL53L0X distanceStr; // Estructura de “estadísticas/estado” que usa la librería
-  volatile uint16_t distance_mm = 0; // Variable donde guardaremos la distancia (mm)
+VL53L0X_RangingMeasurementData_t RangingData;
 
 /* USER CODE END PV */
 
@@ -69,8 +69,8 @@ static void MX_DMA_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_I2S3_Init(void);
 static void MX_SPI1_Init(void);
-static void MX_TIM2_Init(void);
 static void MX_SPI2_Init(void);
+static void MX_TIM1_Init(void);
 void MX_USB_HOST_Process(void);
 
 /* USER CODE BEGIN PFP */
@@ -96,28 +96,17 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-	  HAL_Init();
+  HAL_Init();
 
   /* USER CODE BEGIN Init */
-  int angulo_Radar_Horizontal = 1000;
   //int angulo_Torreta_Horizontal = 1000;
-  float sumatorio_Grados = 0;
-  float media_Grados = 0;
-
-  float sumatorio_Distancia = 0;
-  float media_Distancia = 0;
-
-  uint8_t numero_Objetivos = 0; //no mas de 20 objetivos
-
-  uint8_t flag_Sentido_Horario = 1;
-  uint8_t flag_Objetivo_Detectado = 0;
   //uint8_t flag_modo_manual = 1; //funcionamiento de la torreta deetrminado por modo manual o automatico. HAY QUE ASIGNARLE SWICH
   uint8_t flag_siguiente_objetivo = 1; //se mantiene a uno para que busque objetivo
   //uint8_t flag_disparo = 0;
 
 
   Posicion* Objetivo;
-  int angulo_Laser_Horizontal = 1000;
+  uint16_t angulo_Laser_Horizontal = 1000;
 
   /* USER CODE END Init */
 
@@ -135,38 +124,18 @@ int main(void)
   MX_I2S3_Init();
   MX_SPI1_Init();
   MX_USB_HOST_Init();
-  MX_TIM2_Init();
   MX_SPI2_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   pool_init();
   mapa_init();
 
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
-  htim2.Instance->CCR1 = 1500; // centro
-  htim2.Instance->CCR2 = 1500; // centro
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+  set_servo_radar(&htim1, GIRO_MIN);
+  set_servo_laser(&htim1, GIRO_MIN);
 
-  //Prueba de funcionamiento del sensor laser (Hay que conectar en sensor laser antes y luego debuggear)
-  //Cuando pare en el __NOP(); abre:Window → Show View → Expressions
-  //Añade sensor_ok (botón Add new expression)
-  /*uint8_t addr = 0x29 << 1;     // HAL usa 8-bit
-  HAL_StatusTypeDef ok = HAL_I2C_IsDeviceReady(&hi2c1, addr, 10, 100);
-
-  volatile int sensor_ok = (ok == HAL_OK);  // <-- esto se mira en Watch
-  __NOP();*/
-
-  //Inicializacion del sensor con el .h y .c de github:
-  memset(&distanceStr, 0, sizeof(distanceStr));
-  uint8_t addr = 0x29 << 1; // HAL usa 8-bit
-  if (HAL_I2C_IsDeviceReady(&hi2c1, addr, 10, 200) != HAL_OK) {
-      Error_Handler();
-  }
-  initVL53L0X(1, &hi2c1);  // Inicializa el VL53L0X: el primer parámetro es el ID del sensor (1) y luego el I2C handle
-  // (Opcional recomendado por el autor) Configuración para mejor precisión en distancias largas (1 ~ 2m)
-  setSignalRateLimit(0.1f);
-  setVcselPulsePeriod(VcselPeriodPreRange, 18);
-  setVcselPulsePeriod(VcselPeriodFinalRange, 14);
-  setMeasurementTimingBudget(200000); //  (priorizando precisión para medir mayores distancias, a costa de la velocidad) Si se requiere más velocidad disminuir el TimingBudget
+  LidarPreparacionFuncionamiento(&hi2c1);
 
   /* USER CODE END 2 */
 
@@ -178,64 +147,9 @@ int main(void)
     MX_USB_HOST_Process();
 
     /* USER CODE BEGIN 3 */
-    // Aqui se programa el movimiento del motor del radar
-    if(flag_Sentido_Horario == 1){
-    	angulo_Radar_Horizontal++;
-    }else{
-    	angulo_Radar_Horizontal--;
-    }
-
-    if(angulo_Radar_Horizontal == 2000) flag_Sentido_Horario =  0;
-    else if (angulo_Radar_Horizontal == 1000) flag_Sentido_Horario = 1;
-    if (angulo_Radar_Horizontal < 1000) angulo_Radar_Horizontal = 1000;
-    if (angulo_Radar_Horizontal > 2000) angulo_Radar_Horizontal = 2000;
-    htim2.Instance -> CCR1 = angulo_Radar_Horizontal;
-    // Fin codigo movimiento motor radar
-
-    //Inicio lecturas del sensor de distancia
-    static uint32_t t_last = 0;
-    if (HAL_GetTick() - t_last >= 50) {   // lee cada 50 ms sin interrumpir al motor
-        t_last = HAL_GetTick();
-        distance_mm = readRangeSingleMillimeters(&distanceStr);
-
-        if(distance_mm <= DISTANCIA_DE_DETECCION){
-        	flag_Objetivo_Detectado = 1;
-
-        	sumatorio_Grados += angulo_Radar_Horizontal;
-        	sumatorio_Distancia += (float)distance_mm;
-        	numero_Objetivos++;
-
-        }
-        else {
-            if (flag_Objetivo_Detectado == 1) {
-                if (numero_Objetivos > 0) { //Es una condicion redundante, pero por seguridad la he puesto
-                    media_Grados = sumatorio_Grados / numero_Objetivos;
-                    media_Distancia = sumatorio_Distancia / numero_Objetivos;
-                    if (!objetivo_existente((uint16_t)media_Grados)){ //si el objetivo no esta guardado en lista, se almacena
-                    	objetivo_guarda(media_Distancia, (uint16_t)media_Grados);
-
-                    }
-                }
-
-                // reset
-                sumatorio_Grados = 0;
-                sumatorio_Distancia = 0;
-                numero_Objetivos = 0;
-                flag_Objetivo_Detectado = 0;
-            }
-            else {
-            	if (objetivo_existente((uint16_t)angulo_Radar_Horizontal)){ //si el objetivo esta guardado en lista, se elimina
-            		//borra el objetivo del mapa
-            		Posicion *p = objetivo(objetivo_indice_angulo((uint16_t)angulo_Radar_Horizontal));
-            		mapa_borra_cuz(p);
-
-            		objetivo_libera((uint16_t)angulo_Radar_Horizontal);
-            	}
-            }
-        }
-
-    }
-    //Fin lecturas del sensor de distancia
+    movimiento_radar(&htim1, 5);							// mueve un step el motor
+    LidarMedir(&RangingData);								// mide la distancia tras haber movido el motor
+    detectar_Objetivo(&RangingData, radar_get_angulo());	// funcion general que utiliza todo el codigo de ainara para guardar o eliminar objetivos
     //Inicio codigo movimiento horizontal motor torreta laser
 
     if (flag_siguiente_objetivo ){
@@ -243,7 +157,7 @@ int main(void)
 
     	    if (Objetivo != NULL) {
     	        angulo_Laser_Horizontal = transforma_a_entero(Objetivo->angulo);
-    	        htim2.Instance->CCR2 = angulo_Laser_Horizontal;
+    	        set_servo_laser(&htim1, angulo_Laser_Horizontal);
     	        flag_siguiente_objetivo=0; //hay que hacer mecanismo para que se vuelva a activar, por boton o modo automatico
     	    }
 
@@ -447,66 +361,81 @@ static void MX_SPI2_Init(void)
 }
 
 /**
-  * @brief TIM2 Initialization Function
+  * @brief TIM1 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_TIM2_Init(void)
+static void MX_TIM1_Init(void)
 {
 
-  /* USER CODE BEGIN TIM2_Init 0 */
+  /* USER CODE BEGIN TIM1_Init 0 */
 
-  /* USER CODE END TIM2_Init 0 */
+  /* USER CODE END TIM1_Init 0 */
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
   TIM_OC_InitTypeDef sConfigOC = {0};
+  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
 
-  /* USER CODE BEGIN TIM2_Init 1 */
+  /* USER CODE BEGIN TIM1_Init 1 */
 
-  /* USER CODE END TIM2_Init 1 */
-  htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 168-1;
-  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 20000;
-  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  /* USER CODE END TIM1_Init 1 */
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 49;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 19999;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
   {
     Error_Handler();
   }
   sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
   {
     Error_Handler();
   }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
   {
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 500;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
   sConfigOC.Pulse = 0;
-  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN TIM2_Init 2 */
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+  sBreakDeadTimeConfig.DeadTime = 0;
+  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+  if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM1_Init 2 */
 
-  /* USER CODE END TIM2_Init 2 */
-  HAL_TIM_MspPostInit(&htim2);
+  /* USER CODE END TIM1_Init 2 */
+  HAL_TIM_MspPostInit(&htim1);
 
 }
 
@@ -553,7 +482,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(OTG_FS_PowerSwitchOn_GPIO_Port, OTG_FS_PowerSwitchOn_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(CS_PANTALLA_GPIO_Port, CS_PANTALLA_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, CS_PANTALLA_Pin|Lidar_xshutdown_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, RST_PANTALLA_Pin|DC_PANTALLA_Pin|LD4_Pin|LD3_Pin
@@ -581,6 +510,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
   HAL_GPIO_Init(PDM_OUT_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : PA0 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
   /*Configure GPIO pin : BOOT1_Pin */
   GPIO_InitStruct.Pin = BOOT1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
@@ -595,12 +532,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
   HAL_GPIO_Init(CLK_IN_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : CS_PANTALLA_Pin */
-  GPIO_InitStruct.Pin = CS_PANTALLA_Pin;
+  /*Configure GPIO pins : CS_PANTALLA_Pin Lidar_xshutdown_Pin */
+  GPIO_InitStruct.Pin = CS_PANTALLA_Pin|Lidar_xshutdown_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(CS_PANTALLA_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : RST_PANTALLA_Pin DC_PANTALLA_Pin LD4_Pin LD3_Pin
                            LD5_Pin LD6_Pin Audio_RST_Pin */
