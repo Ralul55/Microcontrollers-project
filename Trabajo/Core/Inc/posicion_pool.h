@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h> //para poder usar bool
 #include <stddef.h> //para poder usar NULL
+#include "vl53l0x_api.h"
 
 #define MAXIMO_OBJETIVOS 20u //los maximos objetivos
 #define OBJETIVO_NO_ENCONTRADO 255u
@@ -61,5 +62,6 @@ void objetivo_establecer_abatido(uint16_t angulo);
 
 void pool_reset(void);
 
+void detectar_Objetivo(VL53L0X_RangingMeasurementData_t *Ranging, uint16_t angulo_actual);
 
 #endif /* INC_POSICION_POOL_H_ */

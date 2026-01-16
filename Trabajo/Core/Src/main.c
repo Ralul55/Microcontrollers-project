@@ -21,7 +21,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "VL53L0X.h"
+#include "sensor_distancia.h"
+#include "motor_radar_movimiento.h"
+#include "motor_laser_movimiento.h"
 #include "posicion_pool.h"
 #include "mapa.h"
 #include <stdio.h>
@@ -61,8 +63,8 @@ TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN PV */
 
-  statInfo_t_VL53L0X distanceStr; // Estructura de “estadísticas/estado” que usa la librería
-  volatile uint16_t distance_mm = 0; // Variable donde guardaremos la distancia (mm)
+  // Sensor de distancia
+  VL53L0X_RangingMeasurementData_t RangingData;
 
   //generales
   uint16_t num_objetivos;
@@ -147,18 +149,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  int angulo_Radar_Horizontal = 1000;
-  //int angulo_Torreta_Horizontal = 1000;
-  float sumatorio_Grados = 0;
-  float media_Grados = 0;
 
-  float sumatorio_Distancia = 0;
-  float media_Distancia = 0;
-
-  uint8_t numero_Objetivos = 0; //no mas de 20 objetivos
-
-  uint8_t flag_Sentido_Horario = 1;
-  uint8_t flag_Objetivo_Detectado = 0;
   //uint8_t flag_modo_manual = 1; //funcionamiento de la torreta deetrminado por modo manual o automatico. HAY QUE ASIGNARLE SWICH
   uint8_t flag_siguiente_objetivo = 1; //se mantiene a uno para que busque objetivo
   //uint8_t flag_disparo = 0;
@@ -185,8 +176,12 @@ int main(void)
   MX_I2C2_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+
   pool_init();
   mapa_init();
+  LidarPreparacionFuncionamiento(&hi2c1);
 
   //Potenciometro ADC
   HAL_NVIC_EnableIRQ(ADC_IRQn);
@@ -200,34 +195,7 @@ int main(void)
   	  Error_Handler();
   }
 
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-  htim1.Instance->CCR1 = 1500; // centro
-  htim1.Instance->CCR2 = 1500; // centro
 
-  //Prueba de funcionamiento del sensor laser (Hay que conectar en sensor laser antes y luego debuggear)
-  //Cuando pare en el __NOP(); abre:Window → Show View → Expressions
-  //Añade sensor_ok (botón Add new expression)
-  /*uint8_t addr = 0x29 << 1;     // HAL usa 8-bit
-  HAL_StatusTypeDef ok = HAL_I2C_IsDeviceReady(&hi2c1, addr, 10, 100);
-
-  volatile int sensor_ok = (ok == HAL_OK);  // <-- esto se mira en Watch
-  __NOP();*/
-
-  /*
-  //Inicializacion del sensor con el .h y .c de github:
-  memset(&distanceStr, 0, sizeof(distanceStr));
-  uint8_t addr = 0x29 << 1; // HAL usa 8-bit
-  if (HAL_I2C_IsDeviceReady(&hi2c1, addr, 10, 200) != HAL_OK) {
-      Error_Handler();
-  }
-  initVL53L0X(1, &hi2c1);  // Inicializa el VL53L0X: el primer parámetro es el ID del sensor (1) y luego el I2C handle
-  // (Opcional recomendado por el autor) Configuración para mejor precisión en distancias largas (1 ~ 2m)
-  setSignalRateLimit(0.1f);
-  setVcselPulsePeriod(VcselPeriodPreRange, 18);
-  setVcselPulsePeriod(VcselPeriodFinalRange, 14);
-  setMeasurementTimingBudget(200000); //  (priorizando precisión para medir mayores distancias, a costa de la velocidad) Si se requiere más velocidad disminuir el TimingBudget
-  */
 
   //Botones
   Boton_Init(&b_cambio_menu, GPIOC, Btn_1_Pin, 0);             //pull-up interno
@@ -249,66 +217,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    // Aqui se programa el movimiento del motor del radar
+	movimiento_radar(&htim1, 5);	// mueve un step el motor
+	LidarMedir(&RangingData);		// mide la distancia tras haber movido el motor
 
-	/*
-    if(flag_Sentido_Horario == 1){
-    	angulo_Radar_Horizontal++;
-    }else{
-    	angulo_Radar_Horizontal--;
-    }
-
-    if(angulo_Radar_Horizontal == 2000) flag_Sentido_Horario =  0;
-    else if (angulo_Radar_Horizontal == 1000) flag_Sentido_Horario = 1;
-    if (angulo_Radar_Horizontal < 1000) angulo_Radar_Horizontal = 1000;
-    if (angulo_Radar_Horizontal > 2000) angulo_Radar_Horizontal = 2000;
-    htim1.Instance -> CCR1 = angulo_Radar_Horizontal;
-    // Fin codigo movimiento motor radar
-
-    //Inicio lecturas del sensor de distancia
-    static uint32_t t_last = 0;
-    if (HAL_GetTick() - t_last >= 50) {   // lee cada 50 ms sin interrumpir al motor
-        t_last = HAL_GetTick();
-        distance_mm = readRangeSingleMillimeters(&distanceStr);
-
-        if(distance_mm <= DISTANCIA_DE_DETECCION){
-        	flag_Objetivo_Detectado = 1;
-
-        	sumatorio_Grados += angulo_Radar_Horizontal;
-        	sumatorio_Distancia += (float)distance_mm;
-        	numero_Objetivos++;
-
-        }
-        else {
-            if (flag_Objetivo_Detectado == 1) {
-                if (numero_Objetivos > 0) { //Es una condicion redundante, pero por seguridad la he puesto
-                    media_Grados = sumatorio_Grados / numero_Objetivos;
-                    media_Distancia = sumatorio_Distancia / numero_Objetivos;
-                    if (!objetivo_existente((uint16_t)media_Grados)){ //si el objetivo no esta guardado en lista, se almacena
-                    	objetivo_guarda(media_Distancia, (uint16_t)media_Grados);
-
-                    }
-                }
-
-                // reset
-                sumatorio_Grados = 0;
-                sumatorio_Distancia = 0;
-                numero_Objetivos = 0;
-                flag_Objetivo_Detectado = 0;
-            }
-            else {
-            	if (objetivo_existente((uint16_t)angulo_Radar_Horizontal)){ //si el objetivo esta guardado en lista, se elimina
-            		//borra el objetivo del mapa
-            		Posicion *p = objetivo(objetivo_indice_angulo((uint16_t)angulo_Radar_Horizontal));
-            		mapa_borra_cuz(p);
-
-            		objetivo_libera((uint16_t)angulo_Radar_Horizontal);
-            	}
-            }
-        }
-
-    }
-    //Fin lecturas del sensor de distancia
     //Inicio codigo movimiento horizontal motor torreta laser
 
     if (flag_siguiente_objetivo ){
@@ -322,7 +233,6 @@ int main(void)
 
     }
         //Fin codigo movimiento horizontal motor torreta laser
-    */
 
     mapa_dibuja(); //dibuja los objetivos
 
@@ -644,7 +554,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 24;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 65535;
+  htim1.Init.Period = 19999;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;

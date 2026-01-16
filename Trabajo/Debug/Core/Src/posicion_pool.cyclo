@@ -17,3 +17,4 @@
 ../Core/Src/posicion_pool.c:169:9:objetivo_indice_angulo	1
 ../Core/Src/posicion_pool.c:175:6:objetivo_establecer_abatido	1
 ../Core/Src/posicion_pool.c:181:6:pool_reset	3
+../Core/Src/posicion_pool.c:191:6:detectar_Objetivo	8

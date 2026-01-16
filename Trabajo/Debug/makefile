@@ -9,6 +9,8 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include Drivers/VL53L0X/platform/src/subdir.mk
+-include Drivers/VL53L0X/core/src/subdir.mk
 -include Drivers/STM32F4xx_HAL_Driver/Src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
@@ -60,8 +62,8 @@ all: main-build
 main-build: Microcontrollers-project.elf secondary-outputs
 
 # Tool invocations
-Microcontrollers-project.elf Microcontrollers-project.map: $(OBJS) $(USER_OBJS) C:\Users\mario\Documents\GitHub\Microcontrollers-project\Trabajo\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Microcontrollers-project.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\mario\Documents\GitHub\Microcontrollers-project\Trabajo\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Microcontrollers-project.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Microcontrollers-project.elf Microcontrollers-project.map: $(OBJS) $(USER_OBJS) C:\Users\raulm\OneDrive\Documentos\GitHub\Microcontrollers-project\Trabajo\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Microcontrollers-project.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\raulm\OneDrive\Documentos\GitHub\Microcontrollers-project\Trabajo\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Microcontrollers-project.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
