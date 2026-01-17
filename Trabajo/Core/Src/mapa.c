@@ -31,6 +31,7 @@ void mapa_init(void){
 	    mapa_dibuja_cuz_g(&p2);
 	    mapa_dibuja_cuz_g(&p3);
 	    mapa_borra_cuz(&p3);
+	    mapa_dibuja_radar();
 
 }
 
@@ -153,7 +154,9 @@ void mapa_dibuja(void){
 				Posicion *p = objetivo(i);
 			    mapa_dibuja_cuz_g(p);
 			}
-		}
+	}
+
+	mapa_dibuja_radar();
 }
 
 void mapa_reset(void){
@@ -163,6 +166,24 @@ void mapa_reset(void){
 				mapa_borra_cuz(p);
 			}
 		}
+}
+
+void mapa_dibuja_radar(void)
+{
+
+    const int w = 10;
+    const int h = 4;
+    int x0 = ((int)TAM_PANT_W - w) / 2;
+    int y0 = ((int)TAM_PANT_H - h) / 2;
+
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            ILI9341_WritePixel((uint16_t)(x0 + x), (uint16_t)(y0 + y), NEGRO);
+        }
+    }
+
+    ILI9341_WritePixel((uint16_t)(x0 + 2), (uint16_t)(y0 + 1), ROJO);
+    ILI9341_WritePixel((uint16_t)(x0 + 7), (uint16_t)(y0 + 1), ROJO);
 }
 
 

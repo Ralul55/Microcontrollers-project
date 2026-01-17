@@ -14,6 +14,8 @@ FireMode laser_get_estado(void);
 
 void laser_apuntar(TIM_HandleTypeDef *htim);
 
-void laser_rotacion_mode(TIM_HandleTypeDef *htim ,uint8_t* flag_boton_siguiente_objetivo, uint8_t* flag_disparo);
+void laser_rotacion_mode(TIM_HandleTypeDef *htim ,uint8_t* flag_boton_siguiente_objetivo, uint8_t* flag_boton_disparo);
+
+void laser_dispara(void);
 
 #endif /* INC_MOTOR_LASER_MOVIMIENTO_H_ */

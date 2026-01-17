@@ -9,4 +9,4 @@
 ../Core/Src/main.c:503:13:MX_SPI2_Init	2
 ../Core/Src/main.c:541:13:MX_TIM1_Init	9
 ../Core/Src/main.c:624:13:MX_GPIO_Init	1
-../Core/Src/main.c:673:6:Error_Handler	1
+../Core/Src/main.c:683:6:Error_Handler	1

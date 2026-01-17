@@ -4,6 +4,7 @@
 
 
 static FireMode estado_actual;
+static uint8_t flag_disparo = 0;
 #define distancia_Laser_Sensor 82 // mm
 #define PI 3.141592
 
@@ -43,23 +44,48 @@ void laser_apuntar(TIM_HandleTypeDef *htim){
 }
 
 
-void laser_rotacion_mode(TIM_HandleTypeDef *htim ,uint8_t* flag_boton_siguiente_objetivo, uint8_t* flag_disparo){
+void laser_rotacion_mode(TIM_HandleTypeDef *htim ,uint8_t* flag_boton_siguiente_objetivo, uint8_t* flag_boton_disparo){
 	switch (estado_actual) {
 		case FIRE_MANUAL:
+			if(*flag_boton_disparo){
+				laser_dispara();
+				*flag_boton_disparo = 0;
+			}
 			if (*flag_boton_siguiente_objetivo==1){
 				laser_apuntar(htim);
 				*flag_boton_siguiente_objetivo=0;
 			}
 			break;
 		case FIRE_AUTO:
-			if (*flag_disparo){
-				HAL_Delay(500);
-				laser_apuntar(htim);
-				*flag_disparo=0;
+			uint32_t actual;
+			flag_disparo = 1;						// Para el primer disparo
+			while(estado_actual == FIRE_AUTO){
+				if (flag_disparo){
+					flag_disparo = 0;
+					actual = HAL_GetTick();
+					if(HAL_GetTick() - actual >= 250){
+						laser_apuntar(htim);
+
+						if(HAL_GetTick() - actual >= 1000){ // Espera para que apunte
+							laser_dispara();
+						}
+					}
+				}
+
 			}
+
 			break;
 	}
 }
 
+void laser_dispara(void){
+	uint32_t inicio = HAL_GetTick();
+	HAL_GPIO_WritePin(Laser_GPIO_Port, Laser_Pin, GPIO_PIN_SET);
+	if(HAL_GetTick() - inicio >= 375){
+		HAL_GPIO_WritePin(Laser_GPIO_Port, Laser_Pin, GPIO_PIN_RESET);
+		flag_disparo = 1;
+	}
+
+}
 
 

@@ -59,6 +59,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define Laser_Pin GPIO_PIN_13
+#define Laser_GPIO_Port GPIOC
 #define RST_PANTALLA_Pin GPIO_PIN_8
 #define RST_PANTALLA_GPIO_Port GPIOD
 #define DC_PANTALLA_Pin GPIO_PIN_9
