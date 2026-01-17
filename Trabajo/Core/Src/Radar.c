@@ -1,4 +1,4 @@
-#include "motor_radar_movimiento.h"
+#include "Laser.h"
 #include "menus.h"
 
 static uint16_t GIRO_MIN = 500u;
@@ -57,4 +57,8 @@ void radar_rotacion_mode(uint16_t grados_rot){
 			GIRO_MAX=grados_rot;
 			break;
 	}
+}
+
+void radar_reset(TIM_HandleTypeDef *htim){
+	set_servo_radar(htim, 500);
 }

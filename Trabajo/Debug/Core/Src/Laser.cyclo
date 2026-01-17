@@ -1,0 +1,8 @@
+../Core/Src/Laser.c:11:6:set_servo_laser_horizontal	1
+../Core/Src/Laser.c:17:6:set_servo_laser_vertical	1
+../Core/Src/Laser.c:22:6:laser_set_estado	1
+../Core/Src/Laser.c:26:10:laser_get_estado	1
+../Core/Src/Laser.c:31:6:laser_apuntar	2
+../Core/Src/Laser.c:47:6:laser_rotacion_mode	9
+../Core/Src/Laser.c:81:6:laser_dispara	2
+../Core/Src/Laser.c:91:6:laser_reset	1

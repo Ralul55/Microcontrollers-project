@@ -1,5 +1,5 @@
-#ifndef INC_MOTOR_LASER_MOVIMIENTO_H_
-#define INC_MOTOR_LASER_MOVIMIENTO_H_
+#ifndef INC_LASER_H_
+#define INC_LASER_H_
 
 #include "main.h"
 #include "posicion_pool.h"
@@ -18,4 +18,6 @@ void laser_rotacion_mode(TIM_HandleTypeDef *htim ,uint8_t* flag_boton_siguiente_
 
 void laser_dispara(void);
 
-#endif /* INC_MOTOR_LASER_MOVIMIENTO_H_ */
+void laser_reset(TIM_HandleTypeDef *htim);
+
+#endif /* INC_LASER_H_ */

@@ -1,4 +1,4 @@
-#include "motor_laser_movimiento.h"
+#include "Laser.h"
 #include "posicion_pool.h"
 #include <math.h>
 
@@ -86,6 +86,11 @@ void laser_dispara(void){
 		flag_disparo = 1;
 	}
 
+}
+
+void laser_reset(TIM_HandleTypeDef *htim){
+	set_servo_laser_horizontal(htim, 500);
+	set_servo_laser_vertical(htim, 500);
 }
 
 

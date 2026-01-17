@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 #include "botones.h"  // BtnEvent
-#include "motor_radar_movimiento.h"
-#include "motor_laser_movimiento.h"
+#include "Radar.h"
+#include "Laser.h"
 
 
 void Menus_Init(void);													//inicializa el menu

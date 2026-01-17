@@ -22,8 +22,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "sensor_distancia.h"
-#include "motor_radar_movimiento.h"
-#include "motor_laser_movimiento.h"
+#include "Radar.h"
+#include "Laser.h"
 #include "posicion_pool.h"
 #include "mapa.h"
 #include <stdio.h>
@@ -272,6 +272,18 @@ int main(void)
 
    	//actualizamos LCD para mostrar cambios
    	LCD_Task();
+
+   	// Funcion del reset general que llame al resto de resets y sea bloqueante
+   	BtnEvent reset = Boton_Update(&b_RESET, now);
+   	if(reset == BTN_EVENT_SHORT){
+   		mapa_reset();
+   		laser_reset(&htim1);
+   		pool_reset();
+   		radar_reset(&htim1);
+   		// aqui falta el menu reset
+
+   	}
+
 
   }
   /* USER CODE END 3 */

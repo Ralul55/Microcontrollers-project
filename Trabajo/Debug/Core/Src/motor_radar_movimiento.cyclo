@@ -1,6 +1,0 @@
-../Core/Src/motor_radar_movimiento.c:12:6:set_servo_radar	1
-../Core/Src/motor_radar_movimiento.c:18:6:movimiento_radar	4
-../Core/Src/motor_radar_movimiento.c:37:10:radar_get_angulo	1
-../Core/Src/motor_radar_movimiento.c:39:6:radar_set_estado	1
-../Core/Src/motor_radar_movimiento.c:44:9:radar_get_estado	1
-../Core/Src/motor_radar_movimiento.c:48:6:radar_rotacion_mode	5

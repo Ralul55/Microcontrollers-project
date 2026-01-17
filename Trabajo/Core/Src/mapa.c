@@ -12,10 +12,12 @@ static bool mapa_limites(int x, int y)
 void mapa_init(void){
 	ILI9341_Init();
 	mapa_rectangulo(40, 0, TAM_PANT_W-80, TAM_PANT_H, FONDO); //cuadrado
+    mapa_dibuja_radar();
 
+    //codigo de prueba
+    	    	/*
 	    mapa_dibuja_cuz(TAM_PANT_W / 2, TAM_PANT_H / 2, true);//habra simbolo para radar
 
-		//codigo de prueba
 
 	    Posicion p1;
 		Posicion p2;
@@ -31,7 +33,8 @@ void mapa_init(void){
 	    mapa_dibuja_cuz_g(&p2);
 	    mapa_dibuja_cuz_g(&p3);
 	    mapa_borra_cuz(&p3);
-	    mapa_dibuja_radar();
+
+	    */
 
 }
 
@@ -143,8 +146,8 @@ void mapa_pasar_coordenadas(Posicion *pos, int coordenadas[2]){
 	float d=pos->distancia;
 	d=(d*(TAM_PANT_H-10)/2)/DISTANCIA_DE_DETECCION;
 
-	coordenadas[0]=x0+(d)*cos((pos->angulo)* (M_PI / 180.0)); //x
-	coordenadas[1]=y0-(d)*sin((pos->angulo)* (M_PI / 180.0)); //y
+	coordenadas[0]=x0+(d)*cos((pos->angulo)*(M_PI / 180.0)); //x
+	coordenadas[1]=y0-(d)*sin((pos->angulo)*(M_PI / 180.0)); //y
 
 }
 
@@ -171,19 +174,21 @@ void mapa_reset(void){
 void mapa_dibuja_radar(void)
 {
 
-    const int w = 10;
-    const int h = 4;
+    const int w = 12;
+    const int h = 8;
     int x0 = ((int)TAM_PANT_W - w) / 2;
     int y0 = ((int)TAM_PANT_H - h) / 2;
 
     for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) {
-            ILI9341_WritePixel((uint16_t)(x0 + x), (uint16_t)(y0 + y), NEGRO);
-        }
+    	for (int x = 0; x < w; x++) {
+    		ILI9341_WritePixel((uint16_t)(x0 + x), (uint16_t)(y0 + y), NEGRO);
+    	}
     }
 
-    ILI9341_WritePixel((uint16_t)(x0 + 2), (uint16_t)(y0 + 1), ROJO);
-    ILI9341_WritePixel((uint16_t)(x0 + 7), (uint16_t)(y0 + 1), ROJO);
+    for (int dy = 0; dy < 2; dy++) {
+    	for (int dx = 0; dx < 2; dx++) {
+    		ILI9341_WritePixel((uint16_t)(x0 + 3 + dx),         (uint16_t)(y0 + 2 + dy), ROJO);
+			ILI9341_WritePixel((uint16_t)(x0 + (w - 3 - 2) + dx),(uint16_t)(y0 + 2 + dy), ROJO);
+    	}
+   }
 }
-
-
