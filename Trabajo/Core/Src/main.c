@@ -70,11 +70,14 @@ TIM_HandleTypeDef htim1;
   uint16_t num_objetivos;
   uint16_t num_abatidos;
 
+   uint8_t flag_boton_siguiente_objetivo=0;
+   uint8_t flag_disparo=0;
+
   FireMode modo_disparo;
   RotMode  modo_rotacion;
 
   uint16_t grados_rot;
-  uint16_t prueba_pote_2;
+  uint16_t distancia_maxima;
 
   //variables Potenciometro ADC
   volatile uint16_t  lectura_pote_1;
@@ -220,7 +223,9 @@ int main(void)
 	LidarMedir(&RangingData);		// mide la distancia tras haber movido el motor
 
 
-    mapa_dibuja(); //dibuja los objetivos
+
+
+
 
 //-------------------------CODE POTES (INTERRUPCIONES) ----------------------------------
 
@@ -228,12 +233,12 @@ int main(void)
     if (adc_ready_1)
     {
     	adc_ready_1 = 0;
-    	grados_rot = (uint16_t)((lectura_pote_1 * 180U) / 4095U);
+    	grados_rot = (uint16_t)((lectura_pote_1 * 2500U) / 4095U);
     }
     if (adc_ready_2)
     {
         adc_ready_2 = 0;
-        prueba_pote_2 = (uint16_t)((lectura_pote_2 * 300U) / 4095U);
+        distancia_maxima = (uint16_t)((lectura_pote_2 * 300U) / 4095U);
     }
     static uint32_t t_adc = 0;
 
@@ -245,6 +250,16 @@ int main(void)
     }
 
 //---------------------------------------------------------------------------------------
+
+
+    //las cositas de ainara
+    	laser_rotacion_mode( &htim1 , &flag_boton_siguiente_objetivo, &flag_disparo);
+    	radar_rotacion_mode(grados_rot);
+        mapa_dibuja(); //dibuja los objetivos
+
+
+//---------------------------------------------------------------------------------------
+
 
     //usamos los botones para interactuar con el menu
     uint32_t now = HAL_GetTick();

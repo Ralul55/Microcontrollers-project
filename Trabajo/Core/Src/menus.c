@@ -71,7 +71,7 @@ static void Menus_Draw(void)
         case MENU_4:
             // Menú 4: ángulo actual (usamos grados_rot)
             LCD_PrintfLine(0, "ANGULO ROTACION");
-            LCD_PrintfVar (1, "GRADOS: %3u", (uint32_t)grados_rot);
+            LCD_PrintfVar (1, "GRADOS: %3u", (uint32_t)((grados_rot - 500.0) * 360.0 / 2000.0));
             break;
     }
 }
