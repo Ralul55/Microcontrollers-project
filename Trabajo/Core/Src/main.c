@@ -178,8 +178,9 @@ int main(void)
   MX_I2C2_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);	// Posicion del radar
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);	// Posicion horizontal del laser
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);	// Posicion verticar del laser
 
   pool_init();
   mapa_init();
@@ -220,7 +221,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 	movimiento_radar(&htim1, 5);	// mueve un step el motor
-	LidarMedir(&RangingData);		// mide la distancia tras haber movido el motor
+	LidarMedir(&RangingData);		// el sensor mide la distancia
 
 
 
