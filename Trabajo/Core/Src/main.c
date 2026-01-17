@@ -151,12 +151,11 @@ int main(void)
   /* USER CODE BEGIN Init */
 
   //uint8_t flag_modo_manual = 1; //funcionamiento de la torreta deetrminado por modo manual o automatico. HAY QUE ASIGNARLE SWICH
-  uint8_t flag_siguiente_objetivo = 1; //se mantiene a uno para que busque objetivo
   //uint8_t flag_disparo = 0;
 
 
-  Posicion* Objetivo;
-  int angulo_Laser_Horizontal = 1000;
+ // Posicion* Objetivo;
+  //int angulo_Laser_Horizontal = 1000;
 
   /* USER CODE END Init */
 
@@ -220,19 +219,6 @@ int main(void)
 	movimiento_radar(&htim1, 5);	// mueve un step el motor
 	LidarMedir(&RangingData);		// mide la distancia tras haber movido el motor
 
-    //Inicio codigo movimiento horizontal motor torreta laser
-
-    if (flag_siguiente_objetivo ){
-    	Objetivo = get_Objetivo();
-
-    	    if (Objetivo != NULL) {
-    	        angulo_Laser_Horizontal = transforma_a_entero(Objetivo->angulo);
-    	        htim1.Instance->CCR2 = angulo_Laser_Horizontal;
-    	        flag_siguiente_objetivo=0; //hay que hacer mecanismo para que se vuelva a activar, por boton o modo automatico
-    	    }
-
-    }
-        //Fin codigo movimiento horizontal motor torreta laser
 
     mapa_dibuja(); //dibuja los objetivos
 

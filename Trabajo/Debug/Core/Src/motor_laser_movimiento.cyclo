@@ -1,1 +1,5 @@
-../Core/Src/motor_laser_movimiento.c:3:6:set_servo_laser	1
+../Core/Src/motor_laser_movimiento.c:7:6:set_servo_laser	1
+../Core/Src/motor_laser_movimiento.c:14:6:laser_set_estado	1
+../Core/Src/motor_laser_movimiento.c:18:10:laser_get_estado	1
+../Core/Src/motor_laser_movimiento.c:23:6:laser_apuntar	2
+../Core/Src/motor_laser_movimiento.c:35:6:laser_rotacion_mode	5

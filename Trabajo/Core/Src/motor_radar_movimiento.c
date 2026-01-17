@@ -1,7 +1,13 @@
 #include "motor_radar_movimiento.h"
+#include "menus.h"
 
-static uint16_t angulo_Radar_Horizontal = GIRO_MIN;
+static uint16_t GIRO_MIN = 500u;
+static uint16_t GIRO_MAX = 2500u;
+static RotMode estado_actual=ROT_360;
+
+static uint16_t angulo_Radar_Horizontal = 500u; //giro min
 static uint8_t flag_Sentido_Horario = 1;
+
 
 void set_servo_radar(TIM_HandleTypeDef *htim, uint16_t us)
 {
@@ -29,3 +35,26 @@ void movimiento_radar(TIM_HandleTypeDef *htim, uint16_t step)
 
 // Getter para el angulo del radar
 uint16_t radar_get_angulo(void) { return angulo_Radar_Horizontal; }
+
+void radar_set_estado(RotMode r){
+	estado_actual=r;
+}
+
+
+RotMode radar_get_estado(void){
+	return estado_actual;
+}
+
+void radar_rotacion_mode(uint16_t grados_rot){
+	switch (estado_actual) {
+		case ROT_360:
+			GIRO_MAX=2500;
+			break;
+		case ROT_180:
+			GIRO_MAX=1500;
+			break;
+		case ROT_MANUAL:
+			GIRO_MAX=grados_rot;
+			break;
+	}
+}
