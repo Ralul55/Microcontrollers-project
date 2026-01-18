@@ -41,9 +41,9 @@ void LidarPreparacionFuncionamiento(I2C_HandleTypeDef *hi2c){
 	Dev->I2cDevAddr = 0x52;					// Direccion inicial del sensor
 
 	// Resetea el xshut cada vez que enra en funcionamiento para evitar fallos
-	HAL_GPIO_WritePin(Lidar_xshutdown_GPIO_Port, Lidar_xshutdown_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOD, Lidar_xshutdown_Pin, GPIO_PIN_RESET);
 	HAL_Delay(50);
-	HAL_GPIO_WritePin(Lidar_xshutdown_GPIO_Port, Lidar_xshutdown_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOD, Lidar_xshutdown_Pin, GPIO_PIN_SET);
 	HAL_Delay(50);
 
 	LidarInit();							// Inicializa el sensor

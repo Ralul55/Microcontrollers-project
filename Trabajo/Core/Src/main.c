@@ -165,6 +165,7 @@ int main(void)
 
   /* Configure the system clock */
   SystemClock_Config();
+  SystemCoreClockUpdate();
 
   /* USER CODE BEGIN SysInit */
 
@@ -209,7 +210,6 @@ int main(void)
   Boton_Init(&b_RESET,  GPIOC, Btn_RESET_Pin, 0);                  //pull-up interno
 
   //Inicializacion archivos LCD
-  HD44780_Init(2);
   LCD_Init();
 
   /* USER CODE END 2 */
@@ -221,8 +221,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	movimiento_radar(&htim1, 5);	// mueve un step el motor
-	LidarMedir(&RangingData);		// el sensor mide la distancia
+	movimiento_radar(&RangingData, &htim1, 5);	// mueve un step el motor el sensor mide la distancia y guarda los datos
 
 
 

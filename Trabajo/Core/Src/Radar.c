@@ -15,7 +15,7 @@ void set_servo_radar(TIM_HandleTypeDef *htim, uint16_t us)
     __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, us);
 }
 
-void movimiento_radar(TIM_HandleTypeDef *htim, uint16_t step)
+void movimiento_radar(VL53L0X_RangingMeasurementData_t *Ranging, TIM_HandleTypeDef *htim, uint16_t step)
 {
 	// Evolucion de la posicion del motor por pasos
 	// Si se quiere hacer un control más fino de la posicion se puede reducir el paso pero ira mas lento
@@ -31,6 +31,10 @@ void movimiento_radar(TIM_HandleTypeDef *htim, uint16_t step)
 
     // Pequeño delay para asegurarnos de que el motor llega a la posicion antes de proceder al siguiente paso en el main
     HAL_Delay(5);
+
+    if (LidarMedir(Ranging) == VL53L0X_ERROR_NONE) {
+       detectar_Objetivo(Ranging, angulo_Radar_Horizontal);
+    }
 }
 
 // Getter para el angulo del radar
