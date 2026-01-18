@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 
+extern uint16_t DISTANCIA_DE_DETECCION;
 
 static bool mapa_limites(int x, int y)
 {
@@ -11,7 +12,12 @@ static bool mapa_limites(int x, int y)
 
 void mapa_init(void){
 	ILI9341_Init();
+<<<<<<< Updated upstream
 	mapa_rectangulo(40, 0, TAM_PANT_W-80, TAM_PANT_H, FONDO); //cuadrado
+=======
+	//mapa_rectangulo(40, 0, TAM_PANT_W-80, TAM_PANT_H, FONDO); //cuadrado
+    mapa_dibuja_radar();
+>>>>>>> Stashed changes
 
 	    mapa_dibuja_cuz(TAM_PANT_W / 2, TAM_PANT_H / 2, true);//habra simbolo para radar
 

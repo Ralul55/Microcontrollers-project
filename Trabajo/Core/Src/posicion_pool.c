@@ -2,6 +2,8 @@
 #include <math.h>
 #include <stdbool.h> //para poder usar bool
 
+uint16_t DISTANCIA_DE_DETECCION; // Definicion de la distancia maxima de detección de objetivos en mm
+uint16_t DISTANCIA_MAX = 1500u;
 
 //gestion de la informacion estatica, solo 1 instancia
 static Posicion datos[MAXIMO_OBJETIVOS];

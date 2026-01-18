@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 ../Core/Src/mapa.c:6:13:mapa_limites	5
 ../Core/Src/mapa.c:12:6:mapa_init	1
 ../Core/Src/mapa.c:37:6:mapa_rectangulo	9
@@ -8,3 +9,16 @@
 ../Core/Src/mapa.c:134:6:mapa_pasar_coordenadas	1
 ../Core/Src/mapa.c:148:6:mapa_dibuja	3
 ../Core/Src/mapa.c:157:6:mapa_reset	3
+=======
+../Core/Src/mapa.c:7:13:mapa_limites	5
+../Core/Src/mapa.c:13:6:mapa_init	1
+../Core/Src/mapa.c:42:6:mapa_rectangulo	9
+../Core/Src/mapa.c:58:6:mapa_dibuja_linea	8
+../Core/Src/mapa.c:91:6:mapa_dibuja_cuz_g	1
+../Core/Src/mapa.c:100:6:mapa_dibuja_cuz	5
+../Core/Src/mapa.c:127:6:mapa_borra_cuz	1
+../Core/Src/mapa.c:141:6:mapa_pasar_coordenadas	1
+../Core/Src/mapa.c:155:6:mapa_dibuja	3
+../Core/Src/mapa.c:166:6:mapa_reset	3
+../Core/Src/mapa.c:175:6:mapa_dibuja_radar	5
+>>>>>>> Stashed changes

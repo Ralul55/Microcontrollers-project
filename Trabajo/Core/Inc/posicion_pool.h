@@ -8,7 +8,6 @@
 
 #define MAXIMO_OBJETIVOS 20u //los maximos objetivos
 #define OBJETIVO_NO_ENCONTRADO 255u
-#define DISTANCIA_DE_DETECCION 1500u // Definicion de la distancia maxima de detección de objetivos en mm
 
 typedef struct
 {

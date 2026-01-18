@@ -176,8 +176,16 @@ int main(void)
   MX_I2C2_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
+<<<<<<< Updated upstream
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+=======
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);	// Posicion del radar
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);	// Posicion horizontal del laser
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);	// Posicion verticar del laser
+  laser_set_estado(FIRE_MANUAL);
+  radar_set_estado(ROT_360);
+>>>>>>> Stashed changes
 
   pool_init();
   mapa_init();
@@ -217,6 +225,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+<<<<<<< Updated upstream
 	movimiento_radar(&htim1, 5);	// mueve un step el motor
 	LidarMedir(&RangingData);		// mide la distancia tras haber movido el motor
 
@@ -230,6 +239,9 @@ int main(void)
     	        htim1.Instance->CCR2 = angulo_Laser_Horizontal;
     	        flag_siguiente_objetivo=0; //hay que hacer mecanismo para que se vuelva a activar, por boton o modo automatico
     	    }
+=======
+	movimiento_radar(&RangingData, &htim1, 5);	// mueve un step el motor y guarda el objetivo si detecta uno
+>>>>>>> Stashed changes
 
     }
         //Fin codigo movimiento horizontal motor torreta laser
@@ -552,7 +564,7 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 24;
+  htim1.Init.Prescaler = 49;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim1.Init.Period = 19999;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;

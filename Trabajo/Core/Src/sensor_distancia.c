@@ -29,14 +29,15 @@ static void LidarInit() {
 // Funcion para obtener la distancia de que detecta el sensor
 VL53L0X_Error LidarMedir(VL53L0X_RangingMeasurementData_t *out)
 {
-    return VL53L0X_PerformSingleRangingMeasurement(Dev, out);
-    // Delay para seguridad
-    HAL_Delay(5);
+	VL53L0X_Error e = VL53L0X_PerformSingleRangingMeasurement(Dev, out);
+	HAL_Delay(5);
+	return e;
 }
 
 // Funcion para arrancar el sensor con los parametros que establece la funcion LidarInit()
 // Fijarse en que se le pasa como argumento el I2C al que pertenezca el sensor, ya que es necesario saber a cual I2C pertenece para prepararlo para poder obtener I2cHandle y I2cDevAddr
 void LidarPreparacionFuncionamiento(I2C_HandleTypeDef *hi2c){
+
 	Dev->I2cHandle = hi2c;
 	Dev->I2cDevAddr = 0x52;					// Direccion inicial del sensor
 
