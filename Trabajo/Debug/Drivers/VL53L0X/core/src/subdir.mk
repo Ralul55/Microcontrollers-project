@@ -28,7 +28,7 @@ C_DEPS += \
 
 # Each subdirectory must supply rules for building sources it contributes
 Drivers/VL53L0X/core/src/%.o Drivers/VL53L0X/core/src/%.su Drivers/VL53L0X/core/src/%.cyclo: ../Drivers/VL53L0X/core/src/%.c Drivers/VL53L0X/core/src/subdir.mk
-	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F407xx -c -I"C:/Users/mario/Documents/GitHub/Microcontrollers-project/Trabajo/Drivers/VL53L0X/core/inc" -I"C:/Users/mario/Documents/GitHub/Microcontrollers-project/Trabajo/Drivers/VL53L0X/platform/inc" -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
+	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F407xx -c -I"C:/Users/ainar/OneDrive/Escritorio/trabajo_micro/Microcontrollers-project/Trabajo/Drivers/VL53L0X/core/inc" -I"C:/Users/ainar/OneDrive/Escritorio/trabajo_micro/Microcontrollers-project/Trabajo/Drivers/VL53L0X/platform/inc" -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 
 clean: clean-Drivers-2f-VL53L0X-2f-core-2f-src
 

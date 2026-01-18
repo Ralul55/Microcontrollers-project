@@ -56,7 +56,7 @@ static void Menus_Draw(void)
     {
         case MENU_1:
             LCD_PrintfVar(0, "NUM OBJETIV: %3u", obj_totales);
-            LCD_PrintfVar(1, "NUM ABATIDOS: %3u", abat_totales);
+            LCD_PrintfVar(1, "NUM ABATIDOS:%3u", abat_totales);
             break;
 
         case MENU_2:
@@ -81,7 +81,7 @@ static void Menus_Draw(void)
 
         case MENU_5:
             LCD_PrintfVar(0, "DIST MAX: %3u", (uint32_t)distancia_maxima);
-            LCD_PrintfVar(0, "DIST ACTUAL: %3u", (uint32_t)distancia_actual);
+            LCD_PrintfVar(1, "DIST ACTUAL: %3u", (uint32_t)distancia_actual);
             break;
     }
 }
@@ -113,7 +113,7 @@ void Menus_Task(TIM_HandleTypeDef *htim, BtnEvent evMenu, BtnEvent evSel, BtnEve
 
     // PD0: cambiar menú con pulsación corta (ahora 4 menús)
     if (evMenu == BTN_EVENT_SHORT) {
-        menu_actual = (Menu)((menu_actual + 1) % 4);
+        menu_actual = (Menu)((menu_actual + 1) % 5);
 
         // Al entrar en menu 2/3, sincroniza preview con lo seleccionado
         if (menu_actual == MENU_2 || menu_actual == MENU_3) {

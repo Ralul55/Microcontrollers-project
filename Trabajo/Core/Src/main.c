@@ -77,7 +77,7 @@ TIM_HandleTypeDef htim1;
   RotMode  modo_rotacion;
 
   uint16_t grados_rot;
-  uint16_t distancia_maxima;
+  uint16_t distancia_maxima=1500;
   uint16_t distancia_actual;
 
   //variables Potenciometro ADC
@@ -206,7 +206,7 @@ int main(void)
   Boton_Init(&b_seleccion_menu,  GPIOC, Btn_2_Pin, 0);         //pull-up interno
   Boton_Init(&b_seleccion_objetivo,  GPIOA, Btn_3_Pin, 0);     //pull-up interno
   Boton_Init(&b_disparo,  GPIOA, Btn_4_Pin, 0);                //pull-up interno
-  Boton_Init(&b_RESET,  GPIOC, Btn_4_Pin, 0);                  //pull-up interno
+  Boton_Init(&b_RESET,  GPIOC, Btn_RESET_Pin, 0);                  //pull-up interno
 
   //Inicializacion archivos LCD
   HD44780_Init(2);
