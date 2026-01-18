@@ -210,6 +210,7 @@ int main(void)
   Boton_Init(&b_RESET,  GPIOC, Btn_RESET_Pin, 0);                  //pull-up interno
 
   //Inicializacion archivos LCD
+  HD44780_Init(2);
   LCD_Init();
 
   /* USER CODE END 2 */
