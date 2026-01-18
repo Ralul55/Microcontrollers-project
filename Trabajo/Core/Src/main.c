@@ -78,6 +78,7 @@ TIM_HandleTypeDef htim1;
 
   uint16_t grados_rot;
   uint16_t distancia_maxima=1500;
+  uint16_t distancia_minima=100;
   uint16_t distancia_actual;
 
   //variables Potenciometro ADC
@@ -224,11 +225,6 @@ int main(void)
     /* USER CODE BEGIN 3 */
 	movimiento_radar(&RangingData, &htim1, 5);	// mueve un step el motor el sensor mide la distancia y guarda los datos
 
-
-
-
-
-
 //-------------------------CODE POTES (INTERRUPCIONES) ----------------------------------
 
     //prueba potes
@@ -240,9 +236,7 @@ int main(void)
     if (adc_ready_2)
     {
         adc_ready_2 = 0;
-        distancia_actual = (uint16_t)((lectura_pote_2 * distancia_maxima) / 4095U);
-        if(distancia_actual==0u){distancia_actual = 1u;}
-
+        distancia_actual = (uint16_t)(distancia_minima + ((lectura_pote_2 * (distancia_maxima - distancia_minima)) / 4095U));
     }
     static uint32_t t_adc = 0;
 

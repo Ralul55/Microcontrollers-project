@@ -14,7 +14,7 @@ static uint8_t numero_objetivos = 0u;
 static uint8_t numero_abatidos = 0u;
 
 //se necesita porque aparentemente comparar 2 floats no es trivial
-static const float margen_igualdad = 0.01f;  // 0,01 grados
+static const float margen_igualdad = 1.0f;  // 1 grados de error
 
 //1000 es 0, 2000 es 360
 //es static, solo se puede usar desde aqui, si se necesita fuera pues se quita el static
