@@ -273,7 +273,7 @@ int main(void)
    	BtnEvent ev_boton_disparo = Boton_Update(&b_disparo, now);
    	BtnEvent ev_boton_siguiente_objetivo = Boton_Update(&b_seleccion_objetivo, now);
 
-   	laser_rotacion_mode(&htim1,ev_boton_siguiente_objetivo, ev_boton_disparo);
+   	laser_rotacion_mode(&htim1, &ev_boton_siguiente_objetivo, &ev_boton_disparo);
 
    	//actualizamos menu
    	Menus_Task(&htim1, evM, evS, evR, now);

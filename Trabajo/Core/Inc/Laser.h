@@ -15,9 +15,11 @@ FireMode laser_get_estado(void);
 
 void laser_apuntar(TIM_HandleTypeDef *htim);
 
-void laser_rotacion_mode(TIM_HandleTypeDef *htim ,BtnEvent  ev_boton_siguiente_objetivo, BtnEvent  ev_boton_disparo);
+void laser_rotacion_mode(TIM_HandleTypeDef *htim, uint8_t* next_obj, uint8_t* fire_btn);
 
-void laser_dispara(void);
+void laser_dispara_task(void);
+void laser_dispara_start(void);
+
 
 void laser_reset(TIM_HandleTypeDef *htim);
 

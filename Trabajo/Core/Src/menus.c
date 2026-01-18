@@ -81,7 +81,7 @@ static void Menus_Draw(void)
 
         case MENU_5:
             LCD_PrintfVar(0, "DIST MAX: %3u", (uint32_t)distancia_maxima);
-            LCD_PrintfVar(1, "DIST ACTUAL: %3u", (uint32_t)distancia_actual);
+            LCD_PrintfVar(1, "DIST ACTUAL:%3u", (uint32_t)distancia_actual);
             break;
     }
 }
