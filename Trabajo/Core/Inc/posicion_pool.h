@@ -8,7 +8,10 @@
 
 #define MAXIMO_OBJETIVOS 20u //los maximos objetivos
 #define OBJETIVO_NO_ENCONTRADO 255u
-#define DISTANCIA_DE_DETECCION 1500u // Definicion de la distancia maxima de detección de objetivos en mm
+
+//#define DISTANCIA_DE_DETECCION 1500u // Definicion de la distancia maxima de detección de objetivos en mm
+extern uint16_t distancia_maxima; //variables del main controladas por el usuario
+extern uint16_t distancia_actual;
 
 typedef struct
 {
@@ -62,6 +65,7 @@ void objetivo_establecer_abatido(uint16_t angulo);
 
 void pool_reset(void);
 
+void detectar_Objetivo(VL53L0X_RangingMeasurementData_t *Ranging, uint16_t angulo_actual);
 
 void detectar_Objetivo(VL53L0X_RangingMeasurementData_t *Ranging, uint16_t angulo_actual); // Combina todas las anteriores para instanciarlo en el while del main.
 

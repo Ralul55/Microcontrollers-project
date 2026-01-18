@@ -1,0 +1,7 @@
+../Core/Src/Radar.c:14:6:set_servo_radar	1
+../Core/Src/Radar.c:20:6:movimiento_radar	5
+../Core/Src/Radar.c:43:10:radar_get_angulo	1
+../Core/Src/Radar.c:45:6:radar_set_estado	1
+../Core/Src/Radar.c:50:9:radar_get_estado	1
+../Core/Src/Radar.c:54:6:radar_rotacion_mode	5
+../Core/Src/Radar.c:68:6:radar_reset	1
