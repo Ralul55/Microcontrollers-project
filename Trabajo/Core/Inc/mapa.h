@@ -31,4 +31,6 @@ void mapa_dibuja(void);
 
 void mapa_reset(void);
 
+void mapa_dibuja_radar(void);
+
 #endif /* INC_MAPA_H_ */

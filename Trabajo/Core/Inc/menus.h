@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 #include "botones.h"  // BtnEvent
+#include "Radar.h"
+#include "Laser.h"
+
 
 void Menus_Init(void);													//inicializa el menu
 void Menus_Task(BtnEvent evMenu, BtnEvent evSel, uint32_t now_ms);		//actualiza menus para que imprima por lcd

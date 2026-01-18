@@ -1,6 +1,8 @@
 #include "posicion_pool.h"
 #include <math.h>
 #include <stdbool.h> //para poder usar bool
+#include "mapa.h"
+#include "stm32f4xx_hal.h"
 
 uint16_t DISTANCIA_DE_DETECCION; // Definicion de la distancia maxima de detección de objetivos en mm
 uint16_t DISTANCIA_MAX = 1500u;
@@ -68,7 +70,7 @@ Posicion* get_Objetivo(){
 	        	if (datos[idx].marcado==2u){continue;}
 
 	            j = (uint8_t)((idx + 1u) % MAXIMO_OBJETIVOS);	 // siguiente para la próxima vez
-	            datos[j].marcado=1u; //se marca como objetivo
+	            datos[idx].marcado=1u; //se marca como objetivo
 	            return &datos[idx];
 	        }
 	    }
@@ -175,6 +177,8 @@ uint8_t objetivo_indice_angulo(uint16_t angulo){
 /////////////////////////////////
 //establecer indice como abatido
 void objetivo_establecer_abatido(uint16_t angulo){
+	uint8_t idx = objetivo_indice_angulo(angulo);
+	    if (idx == OBJETIVO_NO_ENCONTRADO) return;
 	datos[objetivo_indice_angulo(angulo)].marcado=2u;
 	numero_abatidos++;
 	numero_objetivos--;
@@ -192,7 +196,7 @@ void pool_reset(void){
 // Esta función combina todas las anteriores para hacer código funcional, la declaro aqui para dejar mas limpio el main.
 void detectar_Objetivo(VL53L0X_RangingMeasurementData_t *Ranging, uint16_t angulo_actual){
 	static float media_Grados = 0.0f;
-	static media_Distancia = 0.0f;
+	static float media_Distancia = 0.0f;
 	static uint32_t t_last = 0;
 	static float sumatorio_Grados = 0;
 	static float sumatorio_Distancia = 0;
