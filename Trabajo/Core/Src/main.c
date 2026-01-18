@@ -78,6 +78,7 @@ TIM_HandleTypeDef htim1;
 
   uint16_t grados_rot;
   uint16_t distancia_maxima;
+  uint16_t distancia_actual;
 
   //variables Potenciometro ADC
   volatile uint16_t  lectura_pote_1;
@@ -239,7 +240,7 @@ int main(void)
     if (adc_ready_2)
     {
         adc_ready_2 = 0;
-        distancia_maxima = (uint16_t)((lectura_pote_2 * 300U) / 4095U);
+        distancia_actual = (uint16_t)((lectura_pote_2 * distancia_maxima) / 4095U);
     }
     static uint32_t t_adc = 0;
 
@@ -254,9 +255,9 @@ int main(void)
 
 
     //las cositas de ainara
-    	laser_rotacion_mode( &htim1 , &flag_boton_siguiente_objetivo, &flag_disparo);
-    	radar_rotacion_mode(grados_rot);
-        mapa_dibuja(); //dibuja los objetivos
+
+        	radar_rotacion_mode(grados_rot);
+            mapa_dibuja(); //dibuja los objetivos
 
 
 //---------------------------------------------------------------------------------------
@@ -266,9 +267,16 @@ int main(void)
     uint32_t now = HAL_GetTick();
    	BtnEvent evM = Boton_Update(&b_cambio_menu, now);
    	BtnEvent evS = Boton_Update(&b_seleccion_menu,  now);
+   	BtnEvent evR = Boton_Update(&b_RESET,  now);
+
+   	//botones laser
+   	BtnEvent ev_boton_disparo = Boton_Update(&b_disparo, now);
+   	BtnEvent ev_boton_siguiente_objetivo = Boton_Update(&b_seleccion_objetivo, now);
+
+   	laser_rotacion_mode(&htim1,ev_boton_siguiente_objetivo, ev_boton_disparo);
 
    	//actualizamos menu
-   	Menus_Task(evM, evS, now);
+   	Menus_Task(&htim1, evM, evS, evR, now);
 
    	//actualizamos LCD para mostrar cambios
    	LCD_Task();
@@ -276,10 +284,7 @@ int main(void)
    	// Funcion del reset general que llame al resto de resets y sea bloqueante
    	BtnEvent reset = Boton_Update(&b_RESET, now);
    	if(reset == BTN_EVENT_SHORT){
-   		mapa_reset();
-   		laser_reset(&htim1);
-   		pool_reset();
-   		radar_reset(&htim1);
+
    		// aqui falta el menu reset
 
    	}

@@ -44,16 +44,14 @@ void laser_apuntar(TIM_HandleTypeDef *htim){
 }
 
 
-void laser_rotacion_mode(TIM_HandleTypeDef *htim ,uint8_t* flag_boton_siguiente_objetivo, uint8_t* flag_boton_disparo){
+void laser_rotacion_mode(TIM_HandleTypeDef *htim ,BtnEvent  ev_boton_siguiente_objetivo, BtnEvent  ev_boton_disparo){
 	switch (estado_actual) {
 		case FIRE_MANUAL:
-			if(*flag_boton_disparo){
+			if(ev_boton_disparo==BTN_EVENT_SHORT){
 				laser_dispara();
-				*flag_boton_disparo = 0;
 			}
-			if (*flag_boton_siguiente_objetivo==1){
+			if (ev_boton_siguiente_objetivo==BTN_EVENT_SHORT){
 				laser_apuntar(htim);
-				*flag_boton_siguiente_objetivo=0;
 			}
 			break;
 		case FIRE_AUTO:

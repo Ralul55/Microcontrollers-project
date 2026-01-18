@@ -3,6 +3,7 @@
 
 #include "main.h"
 #include "posicion_pool.h"
+#include "botones.h"
 
 
 typedef enum { FIRE_MANUAL = 0, FIRE_AUTO } FireMode;
@@ -14,7 +15,7 @@ FireMode laser_get_estado(void);
 
 void laser_apuntar(TIM_HandleTypeDef *htim);
 
-void laser_rotacion_mode(TIM_HandleTypeDef *htim ,uint8_t* flag_boton_siguiente_objetivo, uint8_t* flag_boton_disparo);
+void laser_rotacion_mode(TIM_HandleTypeDef *htim ,BtnEvent  ev_boton_siguiente_objetivo, BtnEvent  ev_boton_disparo);
 
 void laser_dispara(void);
 

@@ -151,9 +151,10 @@ Posicion* objetivo(uint8_t indice){
 	    return &datos[indice];
 }
 
-uint8_t objetivo_capacidad_total(void){ return MAXIMO_OBJETIVOS; }
-uint8_t objetivo_objetivos_total(void){ return numero_objetivos; }
-uint8_t objetivo_abatidos_total(void){ return numero_abatidos; }
+
+uint8_t objetivo_capacidad_total(void){uint8_t data = MAXIMO_OBJETIVOS; return data; }
+uint8_t objetivo_objetivos_total(void){uint8_t data = numero_objetivos; return data; }
+uint8_t objetivo_abatidos_total(void){uint8_t data = numero_abatidos; return data; }
 
 /////////////////////////////////
 //devuelve indice
