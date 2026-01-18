@@ -301,7 +301,7 @@ static void LCD_WR_DATA(uint8_t data)
 void LCD_IO_WriteMultipleData(uint8_t *pData, uint32_t Size)
 {
 	/* Swap endianes */
-	ConvHL(pData, (int32_t)Size);
+	//ConvHL(pData, (int32_t)Size);
 
 	DC_H();
 //	HAL_SPI_Transmit(&hspi2, (uint8_t*)pData, Size * 2, HAL_MAX_DELAY);

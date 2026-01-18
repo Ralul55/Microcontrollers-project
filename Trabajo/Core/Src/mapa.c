@@ -47,11 +47,28 @@ void mapa_rectangulo(int x, int y, int w, int h, uint16_t color){
 	if (y + h > TAM_PANT_H) h = TAM_PANT_H - y;
 
 
-	for (uint16_t yy = 0; yy < h; yy++) {
-	        for (uint16_t xx = 0; xx < w; xx++) {
-	            ILI9341_WritePixel(x + xx, y + yy, color);
-	        }
-	    }
+	 ILI9341_SetWindow(x, y, x + w - 1, y + h - 1);
+	 LCD_WR_REG(0x2C); //la direccion
+
+	 //la linea
+	 uint8_t line[w * 2]; //w*2 es el tamaño porque es tamaño de fila y el color (2B)
+
+	 //se separa el colore en 2 variables
+	 uint8_t hi = color >> 8;
+	 uint8_t lo = color & 0xFF;
+
+	 //se ordena en la linea
+	 for (uint16_t i = 0; i < w; i++) {
+		 line[2*i]     = hi;
+		 line[2*i + 1] = lo;
+	 }
+
+	 uint8_t line_dma[w * 2];
+
+	 for (uint16_t row = 0; row < h; row++) {
+	     memcpy(line_dma, line, w * 2); //se copia en buffer para que no importa si se corrompe
+	     LCD_IO_WriteMultipleData(line_dma, w);
+	 }
 }
 
 void mapa_dibuja_linea(int x0, int y0, int x1, int y1, uint16_t color){
@@ -192,3 +209,6 @@ void mapa_dibuja_radar(void)
     	}
    }
 }
+
+
+

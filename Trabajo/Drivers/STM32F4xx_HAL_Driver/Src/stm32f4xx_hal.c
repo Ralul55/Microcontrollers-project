@@ -565,7 +565,6 @@ uint32_t HAL_GetUIDw2(void)
   return (READ_REG(*((uint32_t *)(UID_BASE + 8U))));
 }
 
-
 #if defined(STM32F427xx) || defined(STM32F437xx) || defined(STM32F429xx)|| defined(STM32F439xx) ||\
     defined(STM32F469xx) || defined(STM32F479xx)
 /**
