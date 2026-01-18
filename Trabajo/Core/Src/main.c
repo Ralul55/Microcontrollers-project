@@ -240,6 +240,8 @@ int main(void)
     {
         adc_ready_2 = 0;
         distancia_actual = (uint16_t)((lectura_pote_2 * distancia_maxima) / 4095U);
+        if(distancia_actual==0u){distancia_actual = 1u;}
+
     }
     static uint32_t t_adc = 0;
 

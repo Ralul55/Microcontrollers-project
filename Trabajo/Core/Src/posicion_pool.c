@@ -208,7 +208,7 @@ void detectar_Objetivo(VL53L0X_RangingMeasurementData_t *Ranging, uint16_t angul
 	uint16_t distance_mm = Ranging->RangeMilliMeter;
 
 
-	if (distance_mm <= DISTANCIA_DE_DETECCION){
+	if (distance_mm <= distancia_actual){
 	    flag_Objetivo_Detectado = 1;
 	    sumatorio_Grados += angulo_actual;
 	    sumatorio_Distancia += (float)distance_mm;

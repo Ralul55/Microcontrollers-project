@@ -144,7 +144,7 @@ void mapa_pasar_coordenadas(Posicion *pos, int coordenadas[2]){
 
 	//MAXIMA DISTANCIA DE DETECCION 1500, MAXIMOS PIXELES 240 (el radar esta en el centro 120), se hace conversion de distancia
 	float d=pos->distancia;
-	d=(d*(TAM_PANT_H-10)/2)/DISTANCIA_DE_DETECCION;
+	d=(d*(TAM_PANT_H-10)/2)/distancia_maxima;
 
 	coordenadas[0]=x0+(d)*cos((pos->angulo)*(M_PI / 180.0)); //x
 	coordenadas[1]=y0-(d)*sin((pos->angulo)*(M_PI / 180.0)); //y
