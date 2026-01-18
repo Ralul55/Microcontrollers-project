@@ -14,7 +14,7 @@ static uint8_t numero_objetivos = 0u;
 static uint8_t numero_abatidos = 0u;
 
 //se necesita porque aparentemente comparar 2 floats no es trivial
-static const float margen_igualdad = 1.0f;  // 1 grados de error
+static const float margen_igualdad = 3.0f;  // 1 grados de error
 
 //1000 es 0, 2000 es 360
 //es static, solo se puede usar desde aqui, si se necesita fuera pues se quita el static
@@ -216,33 +216,33 @@ void detectar_Objetivo(VL53L0X_RangingMeasurementData_t *Ranging, uint16_t angul
 	}
 
 	else {
-	    if (flag_Objetivo_Detectado == 1) {
-	        if (numero_Objetivos > 0) { //Es una condicion redundante, pero por seguridad la he puesto
-	            media_Grados = sumatorio_Grados / numero_Objetivos;
-	            media_Distancia = sumatorio_Distancia / numero_Objetivos;
+		if (flag_Objetivo_Detectado == 0) {
+			    	if (objetivo_existente(angulo_actual)){ //si el objetivo esta guardado en lista, se elimina
+			    		//borra el objetivo del mapa
+			            Posicion *p = objetivo(objetivo_indice_angulo(angulo_actual));
+			            if (p != NULL) {
+			            	mapa_borra_cuz(p);
+			            }
+			            objetivo_libera(angulo_actual);
+			        }
+		}
+		else {
+			if (numero_Objetivos > 0) { //Es una condicion redundante, pero por seguridad la he puesto
+			    media_Grados = sumatorio_Grados / numero_Objetivos;
+			    media_Distancia = sumatorio_Distancia / numero_Objetivos;
 
-	            uint16_t ang_med = (uint16_t)(media_Grados + 0.5f);
+			    uint16_t ang_med = (uint16_t)(media_Grados + 0.5f);
 
-	            if (!objetivo_existente(ang_med)){ //si el objetivo no esta guardado en lista, se almacena
-	            	objetivo_guarda(media_Distancia, ang_med);
-	            }
-	        }
+			    if (!objetivo_existente(ang_med)){ //si el objetivo no esta guardado en lista, se almacena
+			    	objetivo_guarda(media_Distancia, ang_med);
+			    }
+			 }
 
 	        // reset
 	        sumatorio_Grados = 0;
 	        sumatorio_Distancia = 0;
 	        numero_Objetivos = 0;
 	        flag_Objetivo_Detectado = 0;
-	    }
-	    else {
-	    	if (objetivo_existente(angulo_actual)){ //si el objetivo esta guardado en lista, se elimina
-	    		//borra el objetivo del mapa
-	            Posicion *p = objetivo(objetivo_indice_angulo(angulo_actual));
-	            if (p != NULL) {
-	            	mapa_borra_cuz(p);
-	            }
-	            objetivo_libera(angulo_actual);
-	        }
 	    }
 	}
 }

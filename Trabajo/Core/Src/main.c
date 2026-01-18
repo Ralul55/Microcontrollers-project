@@ -238,7 +238,7 @@ int main(void)
     if (adc_ready_2)
     {
         adc_ready_2 = 0;
-        distancia_actual = (uint16_t)(distancia_minima + ((lectura_pote_2 * (distancia_maxima - distancia_minima)) / 4095U));
+        //distancia_actual = (uint16_t)(distancia_minima + ((lectura_pote_2 * (distancia_maxima - distancia_minima)) / 4095U));
     }
     static uint32_t t_adc = 0;
 
@@ -568,7 +568,7 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 24;
+  htim1.Init.Prescaler = 99;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim1.Init.Period = 19999;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
