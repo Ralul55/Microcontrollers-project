@@ -14,7 +14,7 @@ static uint8_t numero_objetivos = 0u;
 static uint8_t numero_abatidos = 0u;
 
 //se necesita porque aparentemente comparar 2 floats no es trivial
-static const float margen_igualdad = 3.0f;  // 1 grados de error
+static const float margen_igualdad = 3.0f;  // 3 grados de error
 
 //1000 es 0, 2000 es 360
 //es static, solo se puede usar desde aqui, si se necesita fuera pues se quita el static
@@ -196,19 +196,34 @@ void pool_reset(void){
 void detectar_Objetivo(VL53L0X_RangingMeasurementData_t *Ranging, uint16_t angulo_actual){
 	static float media_Grados = 0.0f;
 	static float media_Distancia = 0.0f;
-	static uint32_t t_last = 0;
-	static float sumatorio_Grados = 0;
-	static float sumatorio_Distancia = 0;
-	static uint8_t numero_Objetivos = 0;
-	static uint8_t flag_Objetivo_Detectado = 0;
+	static uint32_t t_last = 0u;
+	static float sumatorio_Grados = 0u;
+	static float sumatorio_Distancia = 0u;
+	static uint8_t numero_Objetivos = 0u;
+	static uint8_t flag_Objetivo_Detectado = 0u;
+
+	static uint16_t miss = 0u;
+	static uint8_t flag_miss = 0u;
+	static uint8_t flag_el_objetivo_es_miss = 0u;
+
+	static Posicion* objetivo_faltante = NULL;
+	const uint16_t umbral_miss =(uint16_t)(transforma_a_entero(margen_igualdad) - transforma_a_entero(0.0f));
 
 	if (HAL_GetTick() - t_last < 50) return;
 	t_last = HAL_GetTick();
 
 	uint16_t distance_mm = Ranging->RangeMilliMeter;
 
-
 	if (distance_mm <= distancia_actual){
+
+		/*
+		CREO QUE VA A HACER QUE SE DOBLE DEFINAN TODOS LOS OBJETIVOS
+
+		//muy importante, si detecta algun objetivo limpia el miss
+		flag_miss = 0u;
+		objetivo_faltante = NULL;
+		*/
+
 	    flag_Objetivo_Detectado = 1;
 	    sumatorio_Grados += angulo_actual;
 	    sumatorio_Distancia += (float)distance_mm;
@@ -216,34 +231,75 @@ void detectar_Objetivo(VL53L0X_RangingMeasurementData_t *Ranging, uint16_t angul
 	}
 
 	else {
-		if (flag_Objetivo_Detectado == 0) {
-			    	if (objetivo_existente(angulo_actual)){ //si el objetivo esta guardado en lista, se elimina
-			    		//borra el objetivo del mapa
-			            Posicion *p = objetivo(objetivo_indice_angulo(angulo_actual));
-			            if (p != NULL) {
-			            	mapa_borra_cuz(p);
-			            }
-			            objetivo_libera(angulo_actual);
-			        }
+		if (flag_Objetivo_Detectado == 1) {
+			if (numero_Objetivos > 0) { //Es una condicion redundante, pero por seguridad la he puesto
+
+				media_Grados = sumatorio_Grados / numero_Objetivos;
+				media_Distancia = sumatorio_Distancia / numero_Objetivos;
+
+				uint16_t ang_med = (uint16_t)(media_Grados + 0.5f);
+
+				//SI HAY UN MISS Y ES EL OBJETIVO DETECTADO SE QUITA EL MISS
+				if (flag_miss && (objetivo_faltante != NULL)) {
+					//se comprueba que este dentro del margen, igual no hace falta
+				    if (fabsf(objetivo_faltante->angulo - (media_Grados + 0.5f)) < margen_igualdad) {
+				        flag_miss = 0u;
+				        objetivo_faltante = NULL;
+				        miss = 0u;
+				        flag_el_objetivo_es_miss=1;
+				    }
+				}
+
+				//si el objetivo no esta guardado en lista ni era un miss, se almacena
+				if (!flag_el_objetivo_es_miss&&!objetivo_existente(ang_med)){
+					objetivo_guarda(media_Distancia, ang_med);
+				}
+			}
+
+			// reset
+			sumatorio_Grados = 0;
+			sumatorio_Distancia = 0;
+			numero_Objetivos = 0;
+			flag_Objetivo_Detectado = 0;
+			flag_el_objetivo_es_miss=0;
+
 		}
 		else {
-			if (numero_Objetivos > 0) { //Es una condicion redundante, pero por seguridad la he puesto
-			    media_Grados = sumatorio_Grados / numero_Objetivos;
-			    media_Distancia = sumatorio_Distancia / numero_Objetivos;
+		    uint8_t idx = objetivo_indice_angulo(angulo_actual);
 
-			    uint16_t ang_med = (uint16_t)(media_Grados + 0.5f);
+		    //si hay un objetivo desaparecido (miss) comprueba la distancia que hay desde donde desaparecio a ahora
+		    if (flag_miss && (objetivo_faltante != NULL)) {
 
-			    if (!objetivo_existente(ang_med)){ //si el objetivo no esta guardado en lista, se almacena
-			    	objetivo_guarda(media_Distancia, ang_med);
-			    }
-			 }
+		    	uint16_t dif;
+		    	if (angulo_actual >= miss){dif = (uint16_t)(angulo_actual - miss);}
+		    	else {dif = (uint16_t)(miss - angulo_actual);}
 
-	        // reset
-	        sumatorio_Grados = 0;
-	        sumatorio_Distancia = 0;
-	        numero_Objetivos = 0;
-	        flag_Objetivo_Detectado = 0;
-	    }
+		    	//si la distancia sobrepasa el margen de igualdad sin encontrarlo se borra
+		    	if (dif >= umbral_miss) {
+		    		miss=0u;
+		    		flag_miss=0u;
+		    		mapa_borra_cuz(objetivo_faltante);
+		    		objetivo_libera_g(objetivo_faltante->angulo);
+		    		objetivo_faltante=NULL;
+		    	}
+		    }
+
+		    // si deberia haber objetivo y no lo hay
+		    if (idx != OBJETIVO_NO_ENCONTRADO) {
+
+		    	Posicion *p = objetivo(idx);
+    		   	//si no lo encuentra lo marca como desaparecido
+		    	   if (p != NULL) {
+		    		   	//comprueba que no este marcado ya el miss
+						if (!flag_miss || (p != objetivo_faltante)) {
+							objetivo_faltante = p;
+							miss = angulo_actual;
+							flag_miss = 1u;
+						}
+		    	   }
+		    }
+
+		}
 	}
-}
 
+}
