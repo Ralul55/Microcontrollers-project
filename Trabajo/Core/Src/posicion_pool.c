@@ -126,7 +126,7 @@ bool objetivo_libera_indice(uint8_t indice){
 	if (indice >= MAXIMO_OBJETIVOS){ return false;}
 	if (huecos_ocupados[indice] == 0u){ return false;}
 
-		if (datos[indice].marcado=!2u){numero_objetivos--;}
+		if (datos[indice].marcado != 2u && (numero_objetivos>0)){numero_objetivos--;}
 
 		huecos_ocupados[indice] = 0u;
 		datos[indice].distancia = 0.0f;
@@ -164,9 +164,23 @@ Posicion* objetivo(uint8_t indice){
 }
 
 
-uint8_t objetivo_capacidad_total(void){uint8_t data = MAXIMO_OBJETIVOS; return data; }
-uint8_t objetivo_objetivos_total(void){uint8_t data = numero_objetivos; return data; }
-uint8_t objetivo_abatidos_total(void){uint8_t data = numero_abatidos; return data; }
+uint8_t objetivo_capacidad_total(void){
+	uint8_t data = MAXIMO_OBJETIVOS;
+	if (data<0){data=0;}
+	return data;
+}
+
+uint8_t objetivo_objetivos_total(void){
+	uint8_t data = numero_objetivos;
+	if (data<0){data=0;}
+	return data;
+}
+
+uint8_t objetivo_abatidos_total(void){
+	uint8_t data = numero_abatidos;
+	if (data<0){data=0;}
+	return data;
+}
 
 /////////////////////////////////
 //devuelve indice
@@ -192,10 +206,12 @@ void objetivo_establecer_abatido(uint16_t angulo){
 	    if (idx == OBJETIVO_NO_ENCONTRADO) return;
 	datos[objetivo_indice_angulo(angulo)].marcado=2u;
 	numero_abatidos++;
-	numero_objetivos--;
+	if (numero_objetivos>0){numero_objetivos--;}
 }
 
 void pool_reset(void){
+	numero_abatidos=0;
+	numero_objetivos=0;
 	for (uint8_t i = 0u; i < MAXIMO_OBJETIVOS; i++){
 		if (huecos_ocupados[i] == 1u) {
 			(void)objetivo_libera_indice(i); //se hace cast a void, se puede hacer comprobacion
@@ -220,7 +236,7 @@ void detectar_Objetivo(VL53L0X_RangingMeasurementData_t *Ranging, uint16_t angul
 	static uint8_t flag_el_objetivo_es_miss = 0u;
 
 	static Posicion* objetivo_faltante = NULL;
-	float angulo_prueba_1 = objetivo_faltante->angulo;
+
 	const uint16_t umbral_miss =(uint16_t)(transforma_a_entero_radar(margen_igualdad) - transforma_a_entero_radar(0.0f));
 
 	if (HAL_GetTick() - t_last < 50) return;

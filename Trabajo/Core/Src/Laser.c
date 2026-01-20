@@ -97,16 +97,18 @@ void laser_rotacion_mode(TIM_HandleTypeDef *htim, uint8_t* next_obj, uint8_t* fi
           break;
 
         case 2: // esperar a que el servo apunte
-          if (HAL_GetTick() - t0 >= 1000) {
-            laser_dispara_start();
-            objetivo_establecer_abatido(angulo_Laser_Horizontal);
-            t0 = HAL_GetTick();
-            fase = 4;
+          if (HAL_GetTick() - t0 >= 2000) {
+        	if(objetivo_objetivos_total() > 0){
+        		laser_dispara_start();
+        		objetivo_establecer_abatido(angulo_Laser_Horizontal);
+        		t0 = HAL_GetTick();
+        		fase = 4;
+        	}
           }
           break;
 
         case 4: // pausa entre disparos (y/o siguiente objetivo)
-          if (HAL_GetTick() - t0 >= 250) {
+          if (HAL_GetTick() - t0 >= 2100) {
             fase = 0; // repetir
           }
           break;

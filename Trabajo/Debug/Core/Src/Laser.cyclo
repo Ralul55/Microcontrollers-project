@@ -5,5 +5,5 @@
 ../Core/Src/Laser.c:32:6:laser_apuntar	2
 ../Core/Src/Laser.c:51:6:laser_dispara_start	2
 ../Core/Src/Laser.c:58:6:laser_dispara_task	3
-../Core/Src/Laser.c:67:6:laser_rotacion_mode	11
-../Core/Src/Laser.c:118:6:laser_reset	1
+../Core/Src/Laser.c:67:6:laser_rotacion_mode	12
+../Core/Src/Laser.c:120:6:laser_reset	1
