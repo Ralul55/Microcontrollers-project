@@ -4,7 +4,7 @@
 
 
 static FireMode estado_actual;
-#define distancia_Laser_Sensor 82 // mm
+#define distancia_Laser_Sensor 80 // mm
 #define PI 3.141592
 
 void set_servo_laser_horizontal(TIM_HandleTypeDef *htim, uint16_t us)
@@ -32,11 +32,11 @@ void laser_apuntar(TIM_HandleTypeDef *htim){
 	Objetivo = get_Objetivo();
 
 	if (Objetivo != NULL) {
-		uint16_t angulo_Laser_Horizontal = transforma_a_entero(Objetivo->angulo);
+		uint16_t angulo_Laser_Horizontal = transforma_a_entero_radar(Objetivo->angulo);
 	    set_servo_laser_horizontal(htim, angulo_Laser_Horizontal);
 
 	    float angulo_Laser_Vertical_radianes = atan2(Objetivo->distancia ,distancia_Laser_Sensor);
-	    uint16_t angulo_Laser_Vertical = transforma_a_entero(angulo_Laser_Vertical_radianes * (360u/(2*PI)));
+	    uint16_t angulo_Laser_Vertical = transforma_a_entero_laser(angulo_Laser_Vertical_radianes * (360u/(2*PI)));
 	    set_servo_laser_vertical(htim, angulo_Laser_Vertical);
 	}
 

@@ -238,7 +238,7 @@ int main(void)
     if (adc_ready_2)
     {
         adc_ready_2 = 0;
-        //distancia_actual = (uint16_t)(distancia_minima + ((lectura_pote_2 * (distancia_maxima - distancia_minima)) / 4095U));
+        distancia_actual = (uint16_t)(distancia_minima + ((lectura_pote_2 * (distancia_maxima - distancia_minima)) / 4095U));
     }
     static uint32_t t_adc = 0;
 

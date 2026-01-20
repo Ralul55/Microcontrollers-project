@@ -5,7 +5,7 @@
 
 static uint16_t GIRO_MIN = 500u;
 static uint16_t GIRO_MAX = 2500u;
-static RotMode estado_actual=ROT_360;
+static RotMode estado_actual=ROT_180;
 
 static uint16_t angulo_Radar_Horizontal = 500u; //giro min
 static uint8_t flag_Sentido_Horario = 1;

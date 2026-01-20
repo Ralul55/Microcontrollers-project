@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdbool.h> //para poder usar bool
 #include "mapa.h"
+#include <stdlib.h>
 #include "stm32f4xx_hal.h"
 
 
@@ -14,7 +15,7 @@ static uint8_t numero_objetivos = 0u;
 static uint8_t numero_abatidos = 0u;
 
 //se necesita porque aparentemente comparar 2 floats no es trivial
-static const float margen_igualdad = 3.0f;  // 3 grados de error
+static const float margen_igualdad = 7.0f;  // 3 grados de error
 
 //1000 es 0, 2000 es 360
 //es static, solo se puede usar desde aqui, si se necesita fuera pues se quita el static
@@ -27,11 +28,21 @@ static float transforma_g(uint16_t angulo){
 }
 
 //Transformacion de grados a el valor entre 1000 (0º) y 2000 (360º) Se necesita  fuera asi que sin static
-uint16_t transforma_a_entero(float angulo){
+uint16_t transforma_a_entero_radar(float angulo){
 	float resultado = (500.0 + (angulo * 2000.0 / 360.0));
 
 		if (resultado < 500.0f) resultado = 500.0f;
 		if (resultado > 2500.0f) resultado = 2500.0f;
+
+		return (uint16_t)(resultado + 0.5f); //+0.5f es para evitar truncamientos raros en el cast
+}
+
+//Transformacion de grados a el valor entre 950 (0º) y 1950 (90º) Se necesita  fuera asi que sin static
+uint16_t transforma_a_entero_laser(float angulo){
+	float resultado = (950.0 + (angulo * 1000.0 / 90.0));
+
+		if (resultado < 950.0f) resultado = 950.0f;
+		if (resultado > 1950.0f) resultado = 1950.0f;
 
 		return (uint16_t)(resultado + 0.5f); //+0.5f es para evitar truncamientos raros en el cast
 }
@@ -88,6 +99,7 @@ bool objetivo_guarda_g(float distancia, float angulo){
 	        datos[i].marcado=0u;
 	        numero_huecos--;
 	        numero_objetivos++;
+	        //mapa_dibuja_cuz_g(objetivo(i));
 	        return true;
 	    }
 	}
@@ -194,6 +206,7 @@ void pool_reset(void){
 
 // Esta función combina todas las anteriores para hacer código funcional, la declaro aqui para dejar mas limpio el main.
 void detectar_Objetivo(VL53L0X_RangingMeasurementData_t *Ranging, uint16_t angulo_actual){
+
 	static float media_Grados = 0.0f;
 	static float media_Distancia = 0.0f;
 	static uint32_t t_last = 0u;
@@ -207,7 +220,8 @@ void detectar_Objetivo(VL53L0X_RangingMeasurementData_t *Ranging, uint16_t angul
 	static uint8_t flag_el_objetivo_es_miss = 0u;
 
 	static Posicion* objetivo_faltante = NULL;
-	const uint16_t umbral_miss =(uint16_t)(transforma_a_entero(margen_igualdad) - transforma_a_entero(0.0f));
+	float angulo_prueba_1 = objetivo_faltante->angulo;
+	const uint16_t umbral_miss =(uint16_t)(transforma_a_entero_radar(margen_igualdad) - transforma_a_entero_radar(0.0f));
 
 	if (HAL_GetTick() - t_last < 50) return;
 	t_last = HAL_GetTick();
@@ -238,11 +252,12 @@ void detectar_Objetivo(VL53L0X_RangingMeasurementData_t *Ranging, uint16_t angul
 				media_Distancia = sumatorio_Distancia / numero_Objetivos;
 
 				uint16_t ang_med = (uint16_t)(media_Grados + 0.5f);
+				float ang_med_deg = transforma_g(ang_med);
 
 				//SI HAY UN MISS Y ES EL OBJETIVO DETECTADO SE QUITA EL MISS
 				if (flag_miss && (objetivo_faltante != NULL)) {
 					//se comprueba que este dentro del margen, igual no hace falta
-				    if (fabsf(objetivo_faltante->angulo - (media_Grados + 0.5f)) < margen_igualdad) {
+					if (fabsf(133u - ang_med_deg) < margen_igualdad) {
 				        flag_miss = 0u;
 				        objetivo_faltante = NULL;
 				        miss = 0u;
@@ -253,6 +268,7 @@ void detectar_Objetivo(VL53L0X_RangingMeasurementData_t *Ranging, uint16_t angul
 				//si el objetivo no esta guardado en lista ni era un miss, se almacena
 				if (!flag_el_objetivo_es_miss&&!objetivo_existente(ang_med)){
 					objetivo_guarda(media_Distancia, ang_med);
+
 				}
 			}
 

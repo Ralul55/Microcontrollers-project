@@ -33,7 +33,8 @@ bool objetivo_guarda_g(float distancia, float angulo);
 //reserva hueco y hace transformacion a angulo
 bool objetivo_guarda(float distancia, uint16_t angulo);
 //Transformacion de grados a el valor entre 1000 (0º) y 2000 (360º)
-uint16_t transforma_a_entero(float angulo);
+uint16_t transforma_a_entero_radar(float angulo);
+uint16_t transforma_a_entero_laser(float angulo);
 
 //libera hueco segun indice
 bool objetivo_libera_indice(uint8_t indice);
