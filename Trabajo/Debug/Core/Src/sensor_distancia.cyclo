@@ -1,3 +1,0 @@
-../Core/Src/sensor_distancia.c:8:13:LidarInit	1
-../Core/Src/sensor_distancia.c:30:15:LidarMedir	1
-../Core/Src/sensor_distancia.c:39:6:LidarPreparacionFuncionamiento	1

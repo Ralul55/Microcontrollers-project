@@ -1,4 +1,0 @@
-../Core/Src/botones.c:9:16:leer_pulsado	3
-../Core/Src/botones.c:16:6:Boton_Init	1
-../Core/Src/botones.c:32:9:Boton_IsPressed	1
-../Core/Src/botones.c:37:10:Boton_Update	10
