@@ -1,3 +1,21 @@
+####################################
+# STM32CubeIDE / Eclipse
+####################################
+Debug/
+Release/
+.settings/
+.build/
+.metadata/
+*.launch
+.mxproject
+
+####################################
+# STM32Cube generated
+####################################
+Core/Startup/*.o
+Core/Startup/*.d
+
+
 # Prerequisites
 *.d
 
