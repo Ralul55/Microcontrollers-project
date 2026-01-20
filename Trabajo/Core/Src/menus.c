@@ -103,8 +103,9 @@ void Menus_Task(TIM_HandleTypeDef *htim, BtnEvent evMenu, BtnEvent evSel, BtnEve
     if (evRes == BTN_EVENT_SHORT){
     	menu_actual = MENU_1;
     	laser_set_estado(FIRE_MANUAL);
-    	radar_set_estado(ROT_360);
+    	radar_set_estado(ROT_180);
 
+    	set_servo_laser_horizontal(htim, 2500);
     	mapa_reset();
     	laser_reset(htim);
     	pool_reset();

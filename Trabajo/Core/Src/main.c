@@ -225,7 +225,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	movimiento_radar(&RangingData, &htim1, 5);	// mueve un step el motor el sensor mide la distancia y guarda los datos
+	movimiento_radar(&RangingData, &htim1, 10);	// mueve un step el motor el sensor mide la distancia y guarda los datos
 
 //-------------------------CODE POTES (INTERRUPCIONES) ----------------------------------
 

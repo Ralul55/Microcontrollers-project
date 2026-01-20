@@ -125,8 +125,8 @@ bool objetivo_existente(uint16_t angulo_medio){
 bool objetivo_libera_indice(uint8_t indice){
 	if (indice >= MAXIMO_OBJETIVOS){ return false;}
 	if (huecos_ocupados[indice] == 0u){ return false;}
-		if (datos[indice].marcado==2u){numero_abatidos--;}
-		else { numero_objetivos--; }
+
+		if (datos[indice].marcado=!2u){numero_objetivos--;}
 
 		huecos_ocupados[indice] = 0u;
 		datos[indice].distancia = 0.0f;

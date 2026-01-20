@@ -26,14 +26,16 @@ FireMode laser_get_estado(void){
 	return estado_actual;
 }
 
-
+static uint16_t entero_tal;
+static Posicion* Objetivo;
+static uint16_t angulo_Laser_Horizontal;
 void laser_apuntar(TIM_HandleTypeDef *htim){
-	Posicion* Objetivo;
 	Objetivo = get_Objetivo();
 
 	if (Objetivo != NULL) {
-		uint16_t angulo_Laser_Horizontal = transforma_a_entero_radar(Objetivo->angulo);
-	    set_servo_laser_horizontal(htim, angulo_Laser_Horizontal);
+		angulo_Laser_Horizontal = transforma_a_entero_radar(Objetivo->angulo);
+		entero_tal = 3050 - angulo_Laser_Horizontal;
+	    set_servo_laser_horizontal(htim, entero_tal); //-angulo_Laser_Horizontal
 
 	    float angulo_Laser_Vertical_radianes = atan2(Objetivo->distancia ,distancia_Laser_Sensor);
 	    uint16_t angulo_Laser_Vertical = transforma_a_entero_laser(angulo_Laser_Vertical_radianes * (360u/(2*PI)));
@@ -55,7 +57,7 @@ void laser_dispara_start(void){
 
 void laser_dispara_task(void){
   if (!laser_pulsando) return;
-  if (HAL_GetTick() - t_laser >= 375){
+  if (HAL_GetTick() - t_laser >= 1000){
     HAL_GPIO_WritePin(Laser_GPIO_Port, Laser_Pin, GPIO_PIN_RESET);
     laser_pulsando = 0;
   }
@@ -75,6 +77,7 @@ void laser_rotacion_mode(TIM_HandleTypeDef *htim, uint8_t* next_obj, uint8_t* fi
     case FIRE_MANUAL:
       if (*fire_btn) {
         laser_dispara_start();
+        objetivo_establecer_abatido(angulo_Laser_Horizontal);
         *fire_btn = 0;
       }
       if (*next_obj) {
@@ -96,6 +99,7 @@ void laser_rotacion_mode(TIM_HandleTypeDef *htim, uint8_t* next_obj, uint8_t* fi
         case 2: // esperar a que el servo apunte
           if (HAL_GetTick() - t0 >= 1000) {
             laser_dispara_start();
+            objetivo_establecer_abatido(angulo_Laser_Horizontal);
             t0 = HAL_GetTick();
             fase = 4;
           }
@@ -112,6 +116,6 @@ void laser_rotacion_mode(TIM_HandleTypeDef *htim, uint8_t* next_obj, uint8_t* fi
 }
 
 void laser_reset(TIM_HandleTypeDef *htim){
-	set_servo_laser_horizontal(htim, 500);
-	set_servo_laser_vertical(htim, 500);
+	set_servo_laser_horizontal(htim, 2500);
+	set_servo_laser_vertical(htim, 950);
 }

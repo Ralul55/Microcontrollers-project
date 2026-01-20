@@ -19,14 +19,15 @@ void set_servo_radar(TIM_HandleTypeDef *htim, uint16_t us)
 
 void movimiento_radar(VL53L0X_RangingMeasurementData_t *Ranging, TIM_HandleTypeDef *htim, uint16_t step)
 {
+	uint8_t step_volver = 2*step;
 	// Evolucion de la posicion del motor por pasos
 	// Si se quiere hacer un control más fino de la posicion se puede reducir el paso pero ira mas lento
     if (flag_Sentido_Horario) angulo_Radar_Horizontal += step;
-    else                      angulo_Radar_Horizontal -= step;
+    else                      angulo_Radar_Horizontal -= step_volver;
 
     // un ligero control de errores para que no se pase del giro maximo/minimo permitido, y si llega al giro maximo/minimo cambia el sentido de rotacion
-    if (angulo_Radar_Horizontal >= GIRO_MAX) { angulo_Radar_Horizontal = GIRO_MAX; flag_Sentido_Horario = 0; }
-    if (angulo_Radar_Horizontal <= GIRO_MIN) { angulo_Radar_Horizontal = GIRO_MIN; flag_Sentido_Horario = 1; }
+    if (angulo_Radar_Horizontal >= GIRO_MAX) { angulo_Radar_Horizontal = GIRO_MAX; flag_Sentido_Horario = 0;}
+    if (angulo_Radar_Horizontal <= GIRO_MIN) { angulo_Radar_Horizontal = GIRO_MIN; flag_Sentido_Horario = 1;}
 
     // Establece la posicion del motor
     set_servo_radar(htim, angulo_Radar_Horizontal);
@@ -34,7 +35,7 @@ void movimiento_radar(VL53L0X_RangingMeasurementData_t *Ranging, TIM_HandleTypeD
     // Pequeño delay para asegurarnos de que el motor llega a la posicion antes de proceder al siguiente paso en el main
     HAL_Delay(5);
 
-    if (LidarMedir(Ranging) == VL53L0X_ERROR_NONE) {
+    if (LidarMedir(Ranging) == VL53L0X_ERROR_NONE && flag_Sentido_Horario == 1) {
        detectar_Objetivo(Ranging, angulo_Radar_Horizontal);
     }
 }
